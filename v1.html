@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="ar" dir="rtl" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arabic Letters Adventure</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Arial', sans-serif;
+      overflow: auto;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+
+    .game-wrapper {
+      width: 100%;
+      height: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .game-title {
+      font-size: 36px;
+      font-weight: bold;
+      margin: 0;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .score-board {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 15px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .score-item {
+      padding: 10px 20px;
+      border-radius: 15px;
+    }
+
+    .game-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .letter-display {
+      font-size: 120px;
+      font-weight: bold;
+      padding: 40px;
+      border-radius: 30px;
+      min-width: 200px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      transition: transform 0.3s;
+    }
+
+    .letter-display:hover {
+      transform: scale(1.05);
+    }
+
+    .pronunciation {
+      font-size: 28px;
+      font-weight: bold;
+      padding: 15px 30px;
+      border-radius: 20px;
+      margin-top: -10px;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .option-btn {
+      font-size: 48px;
+      font-weight: bold;
+      padding: 30px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .option-btn:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+
+    .option-btn:active {
+      transform: translateY(-2px);
+    }
+
+    .feedback {
+      font-size: 24px;
+      font-weight: bold;
+      padding: 15px 30px;
+      border-radius: 15px;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .feedback.show {
+      opacity: 1;
+    }
+
+    .next-btn {
+      font-size: 20px;
+      font-weight: bold;
+      padding: 15px 40px;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .next-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+
+    .star-animation {
+      position: fixed;
+      font-size: 48px;
+      pointer-events: none;
+      z-index: 999;
+      animation: starFloat 1s ease-out forwards;
+    }
+
+    @keyframes starFloat {
+      0% {
+        transform: translateY(0) scale(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100px) scale(1.5);
+        opacity: 0;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .game-title {
+        font-size: 28px;
+      }
+      
+      .letter-display {
+        font-size: 80px;
+        padding: 30px;
+      }
+      
+      .options-grid {
+        grid-template-columns: 1fr;
+        max-width: 300px;
+      }
+      
+      .option-btn {
+        font-size: 36px;
+        padding: 25px;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div class="game-wrapper" id="gameWrapper">
+   <header class="header">
+    <h1 class="game-title" id="gameTitle">مغامرة الحروف العربية</h1>
+    <div class="score-board">
+     <div class="score-item" id="scoreDisplay">
+      ⭐ النقاط: 0
+     </div>
+     <div class="score-item" id="streakDisplay">
+      🔥 متتالية: 0
+     </div>
+    </div>
+   </header>
+   <main class="game-container">
+    <div class="letter-display" id="letterDisplay">
+     أ
+    </div>
+    <div class="pronunciation" id="pronunciation">
+     أَ
+    </div>
+    <div class="options-grid" id="optionsGrid"><button class="option-btn">أَ</button> <button class="option-btn">أُ</button> <button class="option-btn">أِ</button> <button class="option-btn">أْ</button>
+    </div>
+    <div class="feedback" id="feedback"></div><button class="next-btn" id="nextBtn" style="display: none;">التالي ⬅️</button>
+   </main>
+  </div>
+  <script>
+    const defaultConfig = {
+      background_color: "#FFE5F0",
+      surface_color: "#FFFFFF",
+      text_color: "#2C3E50",
+      primary_action_color: "#FF6B9D",
+      secondary_action_color: "#FFA07A",
+      font_family: "Arial",
+      font_size: 16,
+      game_title: "مغامرة الحروف العربية",
+      success_message: "أحسنت! 🎉",
+      try_again_message: "حاول مرة أخرى! 💪"
+    };
+
+    let config = { ...defaultConfig };
+
+    const arabicLetters = [
+      { letter: 'ا', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'ألف' },
+      { letter: 'ب', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'باء' },
+      { letter: 'ت', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'تاء' },
+      { letter: 'ث', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'ثاء' },
+      { letter: 'ج', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: '��يم' },
+      { letter: 'ح', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'حاء' },
+      { letter: 'خ', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'خاء' },
+      { letter: 'د', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'دال' },
+      { letter: 'ذ', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'ذال' },
+      { letter: 'ر', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'راء' },
+      { letter: 'ز', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'زاي' },
+      { letter: 'س', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'سين' },
+      { letter: 'ش', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'شين' },
+      { letter: 'ص', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'صاد' },
+      { letter: 'ض', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'ضاد' },
+      { letter: 'ط', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'طاء' },
+      { letter: 'ظ', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'ظاء' },
+      { letter: 'ع', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'عين' },
+      { letter: 'غ', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'غين' },
+      { letter: 'ف', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'فاء' },
+      { letter: 'ق', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'قاف' },
+      { letter: 'ك', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'كاف' },
+      { letter: 'ل', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'لام' },
+      { letter: 'م', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'ميم' },
+      { letter: 'ن', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'نون' },
+      { letter: 'ه', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'هاء' },
+      { letter: 'و', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'واو' },
+      { letter: 'ي', tashkeel: ['َ', 'ُ', 'ِ', 'ْ'], name: 'ياء' }
+    ];
+
+    let currentLetter = null;
+    let correctTashkeel = null;
+    let score = 0;
+    let streak = 0;
+    let answered = false;
+
+    function shuffleArray(array) {
+      const newArray = [...array];
+      for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+      }
+      return newArray;
+    }
+
+    function createConfetti() {
+      const colors = [config.primary_action_color, config.secondary_action_color, '#FFD700', '#87CEEB', '#98FB98'];
+      for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          confetti.style.left = Math.random() * 100 + '%';
+          confetti.style.top = '-10px';
+          confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.animation = `fall ${2 + Math.random() * 2}s linear forwards`;
+          document.body.appendChild(confetti);
+          
+          setTimeout(() => confetti.remove(), 4000);
+        }, i * 30);
+      }
+    }
+
+    function createStarAnimation(x, y) {
+      const star = document.createElement('div');
+      star.className = 'star-animation';
+      star.textContent = '⭐';
+      star.style.left = x + 'px';
+      star.style.top = y + 'px';
+      document.body.appendChild(star);
+      
+      setTimeout(() => star.remove(), 1000);
+    }
+
+    function loadNewLetter() {
+      answered = false;
+      currentLetter = arabicLetters[Math.floor(Math.random() * arabicLetters.length)];
+      correctTashkeel = currentLetter.tashkeel[Math.floor(Math.random() * 4)];
+      
+      const letterDisplay = document.getElementById('letterDisplay');
+      const pronunciation = document.getElementById('pronunciation');
+      const optionsGrid = document.getElementById('optionsGrid');
+      const feedback = document.getElementById('feedback');
+      const nextBtn = document.getElementById('nextBtn');
+      
+      letterDisplay.textContent = currentLetter.letter;
+      pronunciation.textContent = currentLetter.letter + correctTashkeel;
+      
+      const shuffledTashkeel = shuffleArray(currentLetter.tashkeel);
+      optionsGrid.innerHTML = '';
+      
+      shuffledTashkeel.forEach(tashkeel => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = currentLetter.letter + tashkeel;
+        btn.style.backgroundColor = config.primary_action_color;
+        btn.style.color = config.surface_color;
+        btn.onclick = () => checkAnswer(tashkeel, btn);
+        optionsGrid.appendChild(btn);
+      });
+      
+      feedback.classList.remove('show');
+      feedback.textContent = '';
+      nextBtn.style.display = 'none';
+      
+      applyColors();
+    }
+
+    function checkAnswer(selectedTashkeel, button) {
+      if (answered) return;
+      
+      const feedback = document.getElementById('feedback');
+      const nextBtn = document.getElementById('nextBtn');
+      const allButtons = document.querySelectorAll('.option-btn');
+      
+      if (selectedTashkeel === correctTashkeel) {
+        answered = true;
+        allButtons.forEach(btn => btn.style.pointerEvents = 'none');
+        
+        score += 10;
+        streak++;
+        
+        button.style.backgroundColor = '#4CAF50';
+        feedback.textContent = config.success_message;
+        feedback.style.backgroundColor = '#4CAF50';
+        feedback.style.color = config.surface_color;
+        
+        createConfetti();
+        
+        const rect = button.getBoundingClientRect();
+        createStarAnimation(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        
+        feedback.classList.add('show');
+        updateScore();
+        
+        nextBtn.style.display = 'block';
+        nextBtn.style.backgroundColor = config.secondary_action_color;
+        nextBtn.style.color = config.surface_color;
+      } else {
+        // Wrong answer - disable this button but allow other attempts
+        streak = 0;
+        
+        button.style.backgroundColor = '#FF6B6B';
+        button.style.pointerEvents = 'none';
+        button.style.opacity = '0.5';
+        
+        feedback.textContent = config.try_again_message;
+        feedback.style.backgroundColor = '#FF6B6B';
+        feedback.style.color = config.surface_color;
+        feedback.classList.add('show');
+        
+        updateScore();
+        
+        // Briefly show the feedback, then hide it so they can try again
+        setTimeout(() => {
+          feedback.classList.remove('show');
+        }, 1500);
+      }
+    }
+
+    function updateScore() {
+      const scoreDisplay = document.getElementById('scoreDisplay');
+      const streakDisplay = document.getElementById('streakDisplay');
+      
+      scoreDisplay.textContent = `⭐ النقاط: ${score}`;
+      streakDisplay.textContent = `🔥 متتالية: ${streak}`;
+    }
+
+    function applyColors() {
+      const gameWrapper = document.getElementById('gameWrapper');
+      const gameTitle = document.getElementById('gameTitle');
+      const letterDisplay = document.getElementById('letterDisplay');
+      const pronunciation = document.getElementById('pronunciation');
+      const scoreItems = document.querySelectorAll('.score-item');
+      const nextBtn = document.getElementById('nextBtn');
+      
+      const customFont = config.font_family || defaultConfig.font_family;
+      const baseFontStack = 'Arial, sans-serif';
+      const baseSize = config.font_size || defaultConfig.font_size;
+      
+      gameWrapper.style.backgroundColor = config.background_color || defaultConfig.background_color;
+      gameWrapper.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      
+      gameTitle.textContent = config.game_title || defaultConfig.game_title;
+      gameTitle.style.color = config.text_color || defaultConfig.text_color;
+      gameTitle.style.fontSize = `${baseSize * 2.25}px`;
+      gameTitle.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      
+      letterDisplay.style.backgroundColor = config.surface_color || defaultConfig.surface_color;
+      letterDisplay.style.color = config.primary_action_color || defaultConfig.primary_action_color;
+      letterDisplay.style.fontSize = `${baseSize * 7.5}px`;
+      
+      pronunciation.style.backgroundColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+      pronunciation.style.color = config.surface_color || defaultConfig.surface_color;
+      pronunciation.style.fontSize = `${baseSize * 1.75}px`;
+      
+      scoreItems.forEach(item => {
+        item.style.backgroundColor = config.surface_color || defaultConfig.surface_color;
+        item.style.color = config.text_color || defaultConfig.text_color;
+        item.style.fontSize = `${baseSize * 1.25}px`;
+      });
+      
+      const optionBtns = document.querySelectorAll('.option-btn');
+      optionBtns.forEach(btn => {
+        if (!answered) {
+          btn.style.backgroundColor = config.primary_action_color || defaultConfig.primary_action_color;
+          btn.style.color = config.surface_color || defaultConfig.surface_color;
+        }
+        btn.style.fontSize = `${baseSize * 3}px`;
+      });
+      
+      nextBtn.style.backgroundColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+      nextBtn.style.color = config.surface_color || defaultConfig.surface_color;
+      nextBtn.style.fontSize = `${baseSize * 1.25}px`;
+    }
+
+    async function onConfigChange(newConfig) {
+      Object.assign(config, newConfig);
+      applyColors();
+    }
+
+    function mapToCapabilities(cfg) {
+      return {
+        recolorables: [
+          {
+            get: () => cfg.background_color || defaultConfig.background_color,
+            set: (value) => {
+              cfg.background_color = value;
+              if (window.elementSdk) {
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            }
+          },
+          {
+            get: () => cfg.surface_color || defaultConfig.surface_color,
+            set: (value) => {
+              cfg.surface_color = value;
+              if (window.elementSdk) {
+                window.elementSdk.setConfig({ surface_color: value });
+              }
+            }
+          },
+          {
+            get: () => cfg.text_color || defaultConfig.text_color,
+            set: (value) => {
+              cfg.text_color = value;
+              if (window.elementSdk) {
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            }
+          },
+          {
+            get: () => cfg.primary_action_color || defaultConfig.primary_action_color,
+            set: (value) => {
+              cfg.primary_action_color = value;
+              if (window.elementSdk) {
+                window.elementSdk.setConfig({ primary_action_color: value });
+              }
+            }
+          },
+          {
+            get: () => cfg.secondary_action_color || defaultConfig.secondary_action_color,
+            set: (value) => {
+              cfg.secondary_action_color = value;
+              if (window.elementSdk) {
+                window.elementSdk.setConfig({ secondary_action_color: value });
+              }
+            }
+          }
+        ],
+        borderables: [],
+        fontEditable: {
+          get: () => cfg.font_family || defaultConfig.font_family,
+          set: (value) => {
+            cfg.font_family = value;
+            if (window.elementSdk) {
+              window.elementSdk.setConfig({ font_family: value });
+            }
+          }
+        },
+        fontSizeable: {
+          get: () => cfg.font_size || defaultConfig.font_size,
+          set: (value) => {
+            cfg.font_size = value;
+            if (window.elementSdk) {
+              window.elementSdk.setConfig({ font_size: value });
+            }
+          }
+        }
+      };
+    }
+
+    function mapToEditPanelValues(cfg) {
+      return new Map([
+        ["game_title", cfg.game_title || defaultConfig.game_title],
+        ["success_message", cfg.success_message || defaultConfig.success_message],
+        ["try_again_message", cfg.try_again_message || defaultConfig.try_again_message]
+      ]);
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+      
+      config = window.elementSdk.config;
+    }
+
+    document.getElementById('nextBtn').onclick = () => {
+      loadNewLetter();
+    };
+
+    loadNewLetter();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b298c2f215fe0b5',t:'MTc2NjUxMDYxNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
