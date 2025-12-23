@@ -1,1 +1,667 @@
-Here is the first game for arabic alphabet. <br>Try and give a feedback please. <a href="v1.html">Arabic version 1</a>
+<!doctype html>
+<html lang="ar" dir="rtl" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تعلم الحروف العربية - Arabic Learning Hub</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: auto;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+
+    .landing-wrapper {
+      width: 100%;
+      height: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hero-section {
+      width: 100%;
+      padding: 60px 20px 80px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 20% 50%, rgba(255, 107, 157, 0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(255, 160, 122, 0.15) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .logo-container {
+      margin-bottom: 30px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo {
+      font-size: 72px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .hero-title {
+      font-size: 48px;
+      font-weight: bold;
+      margin: 0 0 20px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-subtitle {
+      font-size: 24px;
+      margin: 0 0 40px 0;
+      opacity: 0.9;
+      position: relative;
+      z-index: 1;
+    }
+
+    .main-content {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 60px 20px;
+    }
+
+    .intro-card {
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .intro-text {
+      font-size: 20px;
+      line-height: 1.8;
+      margin: 0 0 30px 0;
+    }
+
+    .version-badge {
+      display: inline-block;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .game-card {
+      padding: 50px 40px;
+      border-radius: 24px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+      text-align: center;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .game-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    }
+
+    .game-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+      display: inline-block;
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+    }
+
+    .game-title {
+      font-size: 32px;
+      font-weight: bold;
+      margin: 0 0 15px 0;
+    }
+
+    .game-description {
+      font-size: 18px;
+      line-height: 1.6;
+      margin: 0 0 30px 0;
+      opacity: 0.85;
+    }
+
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 35px 0;
+      text-align: right;
+    }
+
+    .feature-item {
+      padding: 12px 0;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+    }
+
+    .feature-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .play-button {
+      font-size: 22px;
+      font-weight: bold;
+      padding: 18px 50px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .play-button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .play-button:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .play-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+
+    .feedback-section {
+      padding: 50px 40px;
+      border-radius: 20px;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .feedback-title {
+      font-size: 28px;
+      font-weight: bold;
+      margin: 0 0 15px 0;
+    }
+
+    .feedback-text {
+      font-size: 18px;
+      line-height: 1.6;
+      margin: 0 0 25px 0;
+      opacity: 0.9;
+    }
+
+    .contact-link {
+      display: inline-block;
+      font-size: 18px;
+      font-weight: bold;
+      padding: 12px 30px;
+      border-radius: 25px;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+
+    .contact-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+
+    .footer {
+      width: 100%;
+      padding: 40px 20px;
+      text-align: center;
+      margin-top: auto;
+    }
+
+    .footer-text {
+      font-size: 16px;
+      margin: 0;
+      opacity: 0.8;
+    }
+
+    .decorative-stars {
+      position: absolute;
+      font-size: 24px;
+      opacity: 0.6;
+      animation: twinkle 2s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% {
+        opacity: 0.3;
+      }
+      50% {
+        opacity: 0.8;
+      }
+    }
+
+    .star-1 { top: 10%; right: 10%; animation-delay: 0s; }
+    .star-2 { top: 20%; left: 15%; animation-delay: 0.5s; }
+    .star-3 { bottom: 15%; right: 20%; animation-delay: 1s; }
+    .star-4 { top: 50%; left: 5%; animation-delay: 1.5s; }
+
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 36px;
+      }
+
+      .hero-subtitle {
+        font-size: 20px;
+      }
+
+      .logo {
+        font-size: 56px;
+      }
+
+      .game-icon {
+        font-size: 60px;
+      }
+
+      .game-title {
+        font-size: 26px;
+      }
+
+      .play-button {
+        font-size: 18px;
+        padding: 15px 40px;
+      }
+
+      .intro-card, .game-card, .feedback-section {
+        padding: 30px 20px;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div class="landing-wrapper" id="landingWrapper">
+   <section class="hero-section" id="heroSection">
+    <div class="decorative-stars star-1">
+     ⭐
+    </div>
+    <div class="decorative-stars star-2">
+     ✨
+    </div>
+    <div class="decorative-stars star-3">
+     🌟
+    </div>
+    <div class="decorative-stars star-4">
+     💫
+    </div>
+    <div class="logo-container">
+     <div class="logo">
+      📚
+     </div>
+    </div>
+    <h1 class="hero-title" id="pageTitle">مركز تعلم اللغة العربية</h1>
+    <p class="hero-subtitle" id="subtitle">رحلة ممتعة لتعلم الحروف والتشكيل</p>
+   </section>
+   <main class="main-content">
+    <div class="intro-card" id="introCard"><span class="version-badge" id="versionBadge">الإصدار 1</span>
+     <p class="intro-text" id="introText">مرحباً بكم في أول لعبة تعليمية للحروف العربية مع التشكيل!<br>
+       صُممت هذه اللعبة خصيصاً للأطفال من عمر 7-9 سنوات لتجعل التعلم ممتعاً ومشوقاً.</p>
+      <p>Try and give a feedback please. <a href="v1.html">Arabic version 1</a></p>
+    </div>
+    <div class="game-card" id="gameCard">
+     <div class="game-icon">
+      🎮
+     </div>
+     <h2 class="game-title">مغامرة الحروف العربية</h2>
+     <p class="game-description" id="gameDescription">لعبة تفاعلية تعلم جميع الحروف العربية الـ28 مع التشكيلات الأربعة: الفتحة، الضمة، الكسرة، والسكون. مع نظام نقاط مشجع واحتفالات ملونة عند كل إجابة صحيحة!</p>
+     <ul class="feature-list">
+      <li class="feature-item"><span class="feature-icon">✅</span> <span>28 حرفاً عربياً مع جميع التشكيلات</span></li>
+      <li class="feature-item"><span class="feature-icon">🎯</span> <span>تعلم تفاعلي مع اختيارات متعددة</span></li>
+      <li class="feature-item"><span class="feature-icon">🎉</span> <span>احتفالات وألوان مبهجة عند النجاح</span></li>
+      <li class="feature-item"><span class="feature-icon">⭐</span> <span>نظام نقاط ومتتاليات للتحفيز</span></li>
+      <li class="feature-item"><span class="feature-icon">🔄</span> <span>فرص متعددة للمحاولة والتعلم</span></li>
+      <li class="feature-item"><span class="feature-icon">📱</span> <span>يعمل على جميع الأجهزة</span></li>
+     </ul><button class="play-button" id="playButton"> <span id="buttonText">ابدأ اللعب الآن</span> 🚀 </button>
+    </div>
+    <div class="feedback-section" id="feedbackSection">
+     <h3 class="feedback-title" id="feedbackTitle">نحتاج رأيك!</h3>
+     <p class="feedback-text">رأيك مهم جداً لتطوير تجربة تعليمية أفضل لأطفالنا.<br>
+       جرب اللعبة وشاركنا ملاحظاتك واقتراحاتك.</p><a href="#contact" class="contact-link" id="contactLink">أرسل ملاحظاتك 💌</a>
+    </div>
+   </main>
+   <footer class="footer" id="footer">
+    <p class="footer-text" id="footerText">© 2024 مركز تعلم اللغة العربية - تعلم ممتع لمستقبل مشرق</p>
+   </footer>
+  </div>
+  <script>
+    const defaultConfig = {
+      background_color: "#F8F9FA",
+      surface_color: "#FFFFFF",
+      text_color: "#2C3E50",
+      primary_action_color: "#FF6B9D",
+      secondary_action_color: "#6C63FF",
+      font_family: "Segoe UI",
+      font_size: 16,
+      page_title: "مركز تعلم اللغة العربية",
+      subtitle: "رحلة ممتعة لتعلم الحروف والتشكيل",
+      intro_text: "مرحباً بكم في أول لعبة تعليمية للحروف العربية مع التشكيل!\nصُممت هذه اللعبة خصيصاً للأطفال من عمر 7-9 سنوات لتجعل التعلم ممتعاً ومشوقاً.",
+      game_description: "لعبة تفاعلية تعلم جميع الحروف العربية الـ28 مع التشكيلات الأربعة: الفتحة، الضمة، الكسرة، والسكون. مع نظام نقاط مشجع واحتفالات ملونة عند كل إجابة صحيحة!",
+      button_text: "ابدأ اللعب الآن",
+      feedback_title: "نحتاج رأيك!",
+      footer_text: "© 2024 مركز تعلم اللغة العربية - تعلم ممتع لمستقبل مشرق"
+    };
+
+    let config = { ...defaultConfig };
+
+    function applyColors() {
+      const landingWrapper = document.getElementById('landingWrapper');
+      const heroSection = document.getElementById('heroSection');
+      const pageTitle = document.getElementById('pageTitle');
+      const subtitle = document.getElementById('subtitle');
+      const introCard = document.getElementById('introCard');
+      const introText = document.getElementById('introText');
+      const versionBadge = document.getElementById('versionBadge');
+      const gameCard = document.getElementById('gameCard');
+      const gameDescription = document.getElementById('gameDescription');
+      const playButton = document.getElementById('playButton');
+      const buttonText = document.getElementById('buttonText');
+      const feedbackSection = document.getElementById('feedbackSection');
+      const feedbackTitle = document.getElementById('feedbackTitle');
+      const contactLink = document.getElementById('contactLink');
+      const footer = document.getElementById('footer');
+      const footerText = document.getElementById('footerText');
+      
+      const customFont = config.font_family || defaultConfig.font_family;
+      const baseFontStack = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
+      const baseSize = config.font_size || defaultConfig.font_size;
+      
+      landingWrapper.style.backgroundColor = config.background_color || defaultConfig.background_color;
+      landingWrapper.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      
+      heroSection.style.backgroundColor = config.primary_action_color || defaultConfig.primary_action_color;
+      heroSection.style.color = config.surface_color || defaultConfig.surface_color;
+      
+      pageTitle.textContent = config.page_title || defaultConfig.page_title;
+      pageTitle.style.color = config.surface_color || defaultConfig.surface_color;
+      pageTitle.style.fontSize = `${baseSize * 3}px`;
+      pageTitle.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      
+      subtitle.textContent = config.subtitle || defaultConfig.subtitle;
+      subtitle.style.color = config.surface_color || defaultConfig.surface_color;
+      subtitle.style.fontSize = `${baseSize * 1.5}px`;
+      subtitle.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      
+      introCard.style.backgroundColor = config.surface_color || defaultConfig.surface_color;
+      
+      const introTextLines = (config.intro_text || defaultConfig.intro_text).split('\n');
+      introText.innerHTML = introTextLines.join('<br>');
+      introText.style.color = config.text_color || defaultConfig.text_color;
+      introText.style.fontSize = `${baseSize * 1.25}px`;
+      introText.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      
+      versionBadge.style.backgroundColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+      versionBadge.style.color = config.surface_color || defaultConfig.surface_color;
+      versionBadge.style.fontSize = `${baseSize * 0.875}px`;
+      
+      gameCard.style.backgroundColor = config.surface_color || defaultConfig.surface_color;
+      
+      gameDescription.textContent = config.game_description || defaultConfig.game_description;
+      gameDescription.style.color = config.text_color || defaultConfig.text_color;
+      gameDescription.style.fontSize = `${baseSize * 1.125}px`;
+      gameDescription.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      
+      const featureItems = document.querySelectorAll('.feature-item');
+      featureItems.forEach(item => {
+        item.style.color = config.text_color || defaultConfig.text_color;
+        item.style.fontSize = `${baseSize}px`;
+      });
+      
+      playButton.style.backgroundColor = config.primary_action_color || defaultConfig.primary_action_color;
+      playButton.style.color = config.surface_color || defaultConfig.surface_color;
+      playButton.style.fontSize = `${baseSize * 1.375}px`;
+      playButton.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      
+      buttonText.textContent = config.button_text || defaultConfig.button_text;
+      
+      feedbackSection.style.backgroundColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+      
+      feedbackTitle.textContent = config.feedback_title || defaultConfig.feedback_title;
+      feedbackTitle.style.color = config.surface_color || defaultConfig.surface_color;
+      feedbackTitle.style.fontSize = `${baseSize * 1.75}px`;
+      feedbackTitle.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      
+      const feedbackText = document.querySelector('.feedback-text');
+      feedbackText.style.color = config.surface_color || defaultConfig.surface_color;
+      feedbackText.style.fontSize = `${baseSize * 1.125}px`;
+      feedbackText.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      
+      contactLink.style.backgroundColor = config.surface_color || defaultConfig.surface_color;
+      contactLink.style.color = config.secondary_action_color || defaultConfig.secondary_action_color;
+      contactLink.style.fontSize = `${baseSize * 1.125}px`;
+      contactLink.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      
+      footer.style.backgroundColor = config.text_color || defaultConfig.text_color;
+      
+      footerText.textContent = config.footer_text || defaultConfig.footer_text;
+      footerText.style.color = config.surface_color || defaultConfig.surface_color;
+      footerText.style.fontSize = `${baseSize}px`;
+      footerText.style.fontFamily = `${customFont}, ${baseFontStack}`;
+    }
+
+    async function onConfigChange(newConfig) {
+      Object.assign(config, newConfig);
+      applyColors();
+    }
+
+    function mapToCapabilities(cfg) {
+      return {
+        recolorables: [
+          {
+            get: () => cfg.background_color || defaultConfig.background_color,
+            set: (value) => {
+              cfg.background_color = value;
+              if (window.elementSdk) {
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            }
+          },
+          {
+            get: () => cfg.surface_color || defaultConfig.surface_color,
+            set: (value) => {
+              cfg.surface_color = value;
+              if (window.elementSdk) {
+                window.elementSdk.setConfig({ surface_color: value });
+              }
+            }
+          },
+          {
+            get: () => cfg.text_color || defaultConfig.text_color,
+            set: (value) => {
+              cfg.text_color = value;
+              if (window.elementSdk) {
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            }
+          },
+          {
+            get: () => cfg.primary_action_color || defaultConfig.primary_action_color,
+            set: (value) => {
+              cfg.primary_action_color = value;
+              if (window.elementSdk) {
+                window.elementSdk.setConfig({ primary_action_color: value });
+              }
+            }
+          },
+          {
+            get: () => cfg.secondary_action_color || defaultConfig.secondary_action_color,
+            set: (value) => {
+              cfg.secondary_action_color = value;
+              if (window.elementSdk) {
+                window.elementSdk.setConfig({ secondary_action_color: value });
+              }
+            }
+          }
+        ],
+        borderables: [],
+        fontEditable: {
+          get: () => cfg.font_family || defaultConfig.font_family,
+          set: (value) => {
+            cfg.font_family = value;
+            if (window.elementSdk) {
+              window.elementSdk.setConfig({ font_family: value });
+            }
+          }
+        },
+        fontSizeable: {
+          get: () => cfg.font_size || defaultConfig.font_size,
+          set: (value) => {
+            cfg.font_size = value;
+            if (window.elementSdk) {
+              window.elementSdk.setConfig({ font_size: value });
+            }
+          }
+        }
+      };
+    }
+
+    function mapToEditPanelValues(cfg) {
+      return new Map([
+        ["page_title", cfg.page_title || defaultConfig.page_title],
+        ["subtitle", cfg.subtitle || defaultConfig.subtitle],
+        ["intro_text", cfg.intro_text || defaultConfig.intro_text],
+        ["game_description", cfg.game_description || defaultConfig.game_description],
+        ["button_text", cfg.button_text || defaultConfig.button_text],
+        ["feedback_title", cfg.feedback_title || defaultConfig.feedback_title],
+        ["footer_text", cfg.footer_text || defaultConfig.footer_text]
+      ]);
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+      
+      config = window.elementSdk.config;
+    }
+
+    // Scroll animation for play button
+    document.getElementById('playButton').addEventListener('click', () => {
+      // Create ripple effect
+      const button = document.getElementById('playButton');
+      button.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        button.style.transform = 'scale(1)';
+      }, 200);
+      
+      // In a real scenario, this would link to the game
+      // For now, we'll show a fun message
+      const message = document.createElement('div');
+      message.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: ${config.secondary_action_color || defaultConfig.secondary_action_color};
+        color: ${config.surface_color || defaultConfig.surface_color};
+        padding: 30px 50px;
+        border-radius: 20px;
+        font-size: 24px;
+        font-weight: bold;
+        z-index: 1000;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        text-align: center;
+      `;
+      message.textContent = 'اللعبة ستفتح قريباً! 🎮✨';
+      document.body.appendChild(message);
+      // Try and give a feedback please. <a href="v1.html">Arabic version 1</a>
+     feedbackMessage.innerHTML = `
+        <h3 style="margin: 0 0 15px 0; color: ${config.primary_action_color || defaultConfig.primary_action_color};">شكراً !</h3>
+        <p style="margin: 0;">Try and give a feedback please. <a href="v1.html">Arabic version 1</a> 📧</p>
+      `;
+      document.body.appendChild(feedbackMessage);
+      
+      setTimeout(() => {
+        message.style.transition = 'opacity 0.5s';
+        message.style.opacity = '0';
+        setTimeout(() => message.remove(), 500);
+      }, 2000);
+    });
+
+    // Contact link functionality
+    document.getElementById('contactLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      const feedbackMessage = document.createElement('div');
+      feedbackMessage.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: ${config.surface_color || defaultConfig.surface_color};
+        color: ${config.text_color || defaultConfig.text_color};
+        padding: 40px;
+        border-radius: 20px;
+        font-size: 18px;
+        z-index: 1000;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        text-align: center;
+        max-width: 400px;
+      `;
+      feedbackMessage.innerHTML = `
+        <h3 style="margin: 0 0 15px 0; color: ${config.primary_action_color || defaultConfig.primary_action_color};">شكراً لاهتمامك!</h3>
+        <p style="margin: 0;">يمكنك إرسال ملاحظاتك عبر البريد الإلكتروني أو وسائل التواصل الاجتماعي 📧</p>
+      `;
+      document.body.appendChild(feedbackMessage);
+      
+      setTimeout(() => {
+        feedbackMessage.style.transition = 'opacity 0.5s';
+        feedbackMessage.style.opacity = '0';
+        setTimeout(() => feedbackMessage.remove(), 500);
+      }, 3000);
+    });
+
+    applyColors();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b29969382a0e0b5',t:'MTc2NjUxMTA0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
