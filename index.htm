@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="ar" dir="rtl" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تعلم الحروف العربية - Arabic Learning Hub</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: auto;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+
+    .landing-wrapper {
+      width: 100%;
+      height: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hero-section {
+      width: 100%;
+      padding: 60px 20px 80px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 20% 50%, rgba(255, 107, 157, 0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(255, 160, 122, 0.15) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .logo-container {
+      margin-bottom: 30px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo {
+      font-size: 72px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .hero-title {
+      font-size: 48px;
+      font-weight: bold;
+      margin: 0 0 20px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-subtitle {
+      font-size: 24px;
+      margin: 0 0 40px 0;
+      opacity: 0.9;
+      position: relative;
+      z-index: 1;
+    }
+
+    .main-content {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 60px 20px;
+    }
+
+    .intro-card {
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .intro-text {
+      font-size: 20px;
+      line-height: 1.8;
+      margin: 0 0 30px 0;
+    }
+
+    .version-badge {
+      display: inline-block;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    /* Styles for the game links */
+    .game-links-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .game-link-btn {
+      text-decoration: none;
+      padding: 12px 25px;
+      border-radius: 12px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      background: #6C63FF;
+      color: white;
+      box-shadow: 0 4px 10px rgba(108, 99, 255, 0.3);
+    }
+
+    .game-link-btn:hover {
+      transform: scale(1.05);
+      filter: brightness(1.1);
+    }
+
+    .game-card {
+      padding: 50px 40px;
+      border-radius: 24px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+      text-align: center;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .game-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    }
+
+    .game-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+      display: inline-block;
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .game-title {
+      font-size: 32px;
+      font-weight: bold;
+      margin: 0 0 15px 0;
+    }
+
+    .game-description {
+      font-size: 18px;
+      line-height: 1.6;
+      margin: 0 0 30px 0;
+      opacity: 0.85;
+    }
+
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 35px 0;
+      text-align: right;
+    }
+
+    .feature-item {
+      padding: 12px 0;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+    }
+
+    .feature-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .play-button {
+      font-size: 22px;
+      font-weight: bold;
+      padding: 18px 50px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feedback-section {
+      padding: 50px 40px;
+      border-radius: 20px;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .feedback-title {
+      font-size: 28px;
+      font-weight: bold;
+      margin: 0 0 15px 0;
+    }
+
+    .contact-link {
+      display: inline-block;
+      font-size: 18px;
+      font-weight: bold;
+      padding: 12px 30px;
+      border-radius: 25px;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+
+    .footer {
+      width: 100%;
+      padding: 40px 20px;
+      text-align: center;
+      margin-top: auto;
+    }
+
+    .decorative-stars {
+      position: absolute;
+      font-size: 24px;
+      opacity: 0.6;
+      animation: twinkle 2s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.8; }
+    }
+
+    .star-1 { top: 10%; right: 10%; animation-delay: 0s; }
+    .star-2 { top: 20%; left: 15%; animation-delay: 0.5s; }
+    .star-3 { bottom: 15%; right: 20%; animation-delay: 1s; }
+    .star-4 { top: 50%; left: 5%; animation-delay: 1.5s; }
+
+    @media (max-width: 768px) {
+      .hero-title { font-size: 36px; }
+      .hero-subtitle { font-size: 20px; }
+      .logo { font-size: 56px; }
+      .game-icon { font-size: 60px; }
+      .game-title { font-size: 26px; }
+      .play-button { font-size: 18px; padding: 15px 40px; }
+    }
+  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+ </head>
+ <body class="h-full">
+  <div class="landing-wrapper" id="landingWrapper">
+   <section class="hero-section" id="heroSection">
+    <div class="decorative-stars star-1">⭐</div>
+    <div class="decorative-stars star-2">✨</div>
+    <div class="decorative-stars star-3">🌟</div>
+    <div class="decorative-stars star-4">💫</div>
+    <div class="logo-container">
+     <div class="logo">📚</div>
+    </div>
+    <h1 class="hero-title" id="pageTitle">مركز تعلم اللغة العربية</h1>
+    <p class="hero-subtitle" id="subtitle">رحلة ممتعة لتعلم الحروف والتشكيل</p>
+   </section>
+
+   <main class="main-content">
+    <div class="intro-card" id="introCard">
+      <span class="version-badge" id="versionBadge">الإصدار 1</span>
+      <p class="intro-text" id="introText">مرحباً بكم في مركز الألعاب التعليمية! صُممت هذه الألعاب لتجعل تعلم الحروف العربية ممتعاً ومشوقاً.</p>
+      
+      <div class="game-links-container">
+        <a href="v1.html" class="game-link-btn" id="linkV1">🎮 لعبة الحروف (الإصدار 1)</a>
+        <a href="v2.html" class="game-link-btn" id="linkV2">🕹️ لعبة الحروف (الإصدار 2)</a>
+      </div>
+    </div>
+
+    <div class="game-card" id="gameCard">
+     <div class="game-icon">🎮</div>
+     <h2 class="game-title">مغامرة الحروف العربية</h2>
+     <p class="game-description" id="gameDescription">لعبة تفاعلية تعلم جميع الحروف العربية الـ28 مع التشكيلات الأربعة: الفتحة، الضمة، الكسرة، والسكون.</p>
+     <ul class="feature-list">
+      <li class="feature-item"><span class="feature-icon">✅</span> <span>28 حرفاً عربياً مع جميع التشكيلات</span></li>
+      <li class="feature-item"><span class="feature-icon">🎯</span> <span>تعلم تفاعلي مع اختيارات متعددة</span></li>
+      <li class="feature-item"><span class="feature-icon">🎉</span> <span>احتفالات وألوان مبهجة عند النجاح</span></li>
+     </ul>
+     <button class="play-button" id="playButton"> <span id="buttonText">ابدأ اللعب الآن</span> 🚀 </button>
+    </div>
+
+    <div class="feedback-section" id="feedbackSection">
+     <h3 class="feedback-title" id="feedbackTitle">نحتاج رأيك!</h3>
+     <p class="feedback-text">رأيك مهم جداً لتطوير تجربة تعليمية أفضل لأطفالنا.</p>
+     <a href="#" class="contact-link" id="contactLink">أرسل ملاحظاتك 💌</a>
+    </div>
+   </main>
+
+   <footer class="footer" id="footer">
+    <p class="footer-text" id="footerText">© 2024 مركز تعلم اللغة العربية - تعلم ممتع لمستقبل مشرق</p>
+   </footer>
+  </div>
+
+  <script>
+    const defaultConfig = {
+      background_color: "#F8F9FA",
+      surface_color: "#FFFFFF",
+      text_color: "#2C3E50",
+      primary_action_color: "#FF6B9D",
+      secondary_action_color: "#6C63FF",
+      font_family: "Segoe UI",
+      font_size: 16,
+      page_title: "مركز تعلم اللغة العربية",
+      subtitle: "رحلة ممتعة لتعلم الحروف والتشكيل",
+      intro_text: "مرحباً بكم في مركز الألعاب التعليمية! صُممت هذه الألعاب لتجعل تعلم الحروف العربية ممتعاً ومشوقاً.",
+      game_description: "لعبة تفاعلية تعلم جميع الحروف العربية الـ28 مع التشكيلات الأربعة. مع نظام نقاط مشجع واحتفالات ملونة!",
+      button_text: "ابدأ اللعب الآن",
+      feedback_title: "نحتاج رأيك!",
+      footer_text: "© 2024 مركز تعلم اللغة العربية - تعلم ممتع لمستقبل مشرق"
+    };
+
+    let config = { ...defaultConfig };
+
+    function applyColors() {
+      const elements = {
+        landingWrapper: document.getElementById('landingWrapper'),
+        heroSection: document.getElementById('heroSection'),
+        pageTitle: document.getElementById('pageTitle'),
+        subtitle: document.getElementById('subtitle'),
+        introCard: document.getElementById('introCard'),
+        introText: document.getElementById('introText'),
+        versionBadge: document.getElementById('versionBadge'),
+        gameCard: document.getElementById('gameCard'),
+        gameDescription: document.getElementById('gameDescription'),
+        playButton: document.getElementById('playButton'),
+        buttonText: document.getElementById('buttonText'),
+        feedbackSection: document.getElementById('feedbackSection'),
+        feedbackTitle: document.getElementById('feedbackTitle'),
+        contactLink: document.getElementById('contactLink'),
+        footer: document.getElementById('footer'),
+        footerText: document.getElementById('footerText'),
+        linkV1: document.getElementById('linkV1'),
+        linkV2: document.getElementById('linkV2')
+      };
+      
+      const customFont = config.font_family || defaultConfig.font_family;
+      const baseSize = config.font_size || defaultConfig.font_size;
+      
+      elements.landingWrapper.style.backgroundColor = config.background_color;
+      elements.heroSection.style.backgroundColor = config.primary_action_color;
+      elements.heroSection.style.color = config.surface_color;
+      
+      elements.pageTitle.textContent = config.page_title;
+      elements.subtitle.textContent = config.subtitle;
+      
+      elements.introCard.style.backgroundColor = config.surface_color;
+      elements.introText.textContent = config.intro_text;
+      elements.introText.style.color = config.text_color;
+      
+      elements.versionBadge.style.backgroundColor = config.secondary_action_color;
+      elements.versionBadge.style.color = config.surface_color;
+      
+      elements.gameCard.style.backgroundColor = config.surface_color;
+      elements.gameDescription.textContent = config.game_description;
+      elements.gameDescription.style.color = config.text_color;
+      
+      elements.playButton.style.backgroundColor = config.primary_action_color;
+      elements.playButton.style.color = config.surface_color;
+      elements.buttonText.textContent = config.button_text;
+      
+      elements.feedbackSection.style.backgroundColor = config.secondary_action_color;
+      elements.feedbackTitle.style.color = config.surface_color;
+      elements.contactLink.style.backgroundColor = config.surface_color;
+      elements.contactLink.style.color = config.secondary_action_color;
+      
+      elements.footer.style.backgroundColor = config.text_color;
+      elements.footerText.style.color = config.surface_color;
+
+      // Style the new links based on config
+      elements.linkV1.style.backgroundColor = config.secondary_action_color;
+      elements.linkV2.style.backgroundColor = config.secondary_action_color;
+    }
+
+    // Play button logic
+    document.getElementById('playButton').addEventListener('click', () => {
+      const message = document.createElement('div');
+      message.style.cssText = `
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        background: ${config.secondary_action_color}; color: white;
+        padding: 30px; border-radius: 20px; z-index: 1000; text-align: center;
+      `;
+      message.innerHTML = `<h3>اختر نسخة للبدء:</h3><br>
+        <a href="v1.html" style="color:white; font-weight:bold;">نسخة 1</a> | 
+        <a href="v2.html" style="color:white; font-weight:bold;">نسخة 2</a>`;
+      document.body.appendChild(message);
+      
+      setTimeout(() => {
+        message.style.opacity = '0';
+        setTimeout(() => message.remove(), 500);
+      }, 5000);
+    });
+
+    // Contact link logic
+    document.getElementById('contactLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      alert("شكراً لاهتمامك! يمكنك إرسال ملاحظاتك قريباً.");
+    });
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange: (newConfig) => {
+          Object.assign(config, newConfig);
+          applyColors();
+        }
+      });
+    }
+
+    applyColors();
+  </script>
+ </body>
+</html>
