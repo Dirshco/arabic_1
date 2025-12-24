@@ -21,12 +21,6 @@
       100% { transform: rotateY(0deg); }
     }
     
-    .star { animation: twinkle 1.5s ease-in-out infinite; }
-    @keyframes twinkle {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.2); }
-    }
-    
     .balloon { animation: float 3s ease-in-out infinite; display: inline-block; }
     @keyframes float {
       0%, 100% { transform: translateY(0px); }
@@ -97,6 +91,7 @@
     let matchesFound = 0;
     let firstCard = null;
     let lockBoard = false;
+    let memoryPairs = [];
 
     function getConfig() {
       return window.elementSdk?.config || defaultConfig;
@@ -120,14 +115,34 @@
       return [...array].sort(() => Math.random() - 0.5);
     }
 
+    window.switchLevel = function(lvl) {
+      currentLevel = lvl;
+      if (currentMode === 'memory') initializeMemoryGame();
+      render();
+    };
+
+    window.switchMode = function(mode) {
+      currentMode = mode;
+      firstCard = null;
+      lockBoard = false;
+      if (mode === 'memory') initializeMemoryGame();
+      render();
+    };
+
+    function initializeMemoryGame() {
+      const names = shuffleArray(getCurrentNames().slice(0, 8));
+      memoryPairs = shuffleArray([...names, ...names]);
+      matchesFound = 0;
+    }
+
     function renderLevelButtons() {
       const config = getConfig();
       return `
         <div class="flex justify-center gap-4 mb-6">
-          <button style="background: ${currentLevel === 1 ? config.primary_color : config.secondary_color}; color: white;"
-            class="level-badge px-6 py-3 rounded-full text-xl font-black shadow-lg" onclick="switchLevel(1)">🥇 المستوى 1</button>
-          <button style="background: ${currentLevel === 2 ? config.primary_color : config.secondary_color}; color: white;"
-            class="level-badge px-6 py-3 rounded-full text-xl font-black shadow-lg" onclick="switchLevel(2)">🥈 المستوى 2</button>
+          <button style="background: ${currentLevel === 1 ? config.primary_color : config.secondary_color};"
+            class="level-badge px-6 py-3 rounded-full text-xl font-black shadow-lg text-white" onclick="switchLevel(1)">🥇 المستوى 1</button>
+          <button style="background: ${currentLevel === 2 ? config.primary_color : config.secondary_color};"
+            class="level-badge px-6 py-3 rounded-full text-xl font-black shadow-lg text-white" onclick="switchLevel(2)">🥈 المستوى 2</button>
         </div>`;
     }
 
@@ -135,12 +150,12 @@
       const config = getConfig();
       return `
         <div class="flex justify-center gap-4 flex-wrap mb-8">
-          <button style="background: ${currentMode === 'cards' ? config.primary_color : config.secondary_color}; color: white;"
-            class="px-6 py-3 rounded-full text-xl font-black shadow-lg" onclick="switchMode('cards')">🃏 البطاقات</button>
-          <button style="background: ${currentMode === 'memory' ? config.primary_color : config.secondary_color}; color: white;"
-            class="px-6 py-3 rounded-full text-xl font-black shadow-lg" onclick="switchMode('memory')">🧠 الذاكرة</button>
-          <button style="background: ${currentMode === 'quiz' ? config.primary_color : config.secondary_color}; color: white;"
-            class="px-6 py-3 rounded-full text-xl font-black shadow-lg" onclick="switchMode('quiz')">📝 الاختبار</button>
+          <button style="background: ${currentMode === 'cards' ? config.primary_color : config.secondary_color};"
+            class="px-6 py-3 rounded-full text-xl font-black shadow-lg text-white" onclick="switchMode('cards')">🃏 البطاقات</button>
+          <button style="background: ${currentMode === 'memory' ? config.primary_color : config.secondary_color};"
+            class="px-6 py-3 rounded-full text-xl font-black shadow-lg text-white" onclick="switchMode('memory')">🧠 الذاكرة</button>
+          <button style="background: ${currentMode === 'quiz' ? config.primary_color : config.secondary_color};"
+            class="px-6 py-3 rounded-full text-xl font-black shadow-lg text-white" onclick="switchMode('quiz')">📝 الاختبار</button>
         </div>`;
     }
 
@@ -166,10 +181,6 @@
 
     function renderMemoryMode() {
       const config = getConfig();
-      const names = shuffleArray(getCurrentNames().slice(0, 8));
-      const gamePairs = shuffleArray([...names, ...names]);
-      matchesFound = 0;
-      
       return `
         <div style="background: ${config.background_color};" class="w-full min-h-full p-6 text-center">
           <h1 style="color: ${config.primary_color};" class="text-5xl font-black mb-4">🧠 لعبة الذاكرة</h1>
@@ -178,11 +189,11 @@
           </div>
           ${renderLevelButtons()}
           ${renderGameModeButtons()}
-          <div class="grid grid-cols-4 gap-4 max-w-4xl mx-auto" id="memory-grid">
-            ${gamePairs.map((item, index) => `
-              <div class="card rounded-2xl shadow-lg h-32 flex items-center justify-center text-5xl" 
-                   style="background: ${config.primary_color}; color: white;"
-                   onclick="handleMemoryClick(this, '${item.name}', '${item.emoji}')">❓</div>`).join('')}
+          <div class="grid grid-cols-4 gap-4 max-w-4xl mx-auto">
+            ${memoryPairs.map((item, index) => `
+              <div class="card rounded-2xl shadow-lg h-32 flex items-center justify-center text-5xl text-white" 
+                   style="background: ${config.primary_color};"
+                   onclick="handleMemoryClick(this, ${index})">❓</div>`).join('')}
           </div>
         </div>`;
     }
@@ -205,8 +216,8 @@
             <div class="text-9xl mb-8 balloon">${target.emoji}</div>
             <div class="grid grid-cols-2 gap-4">
               ${options.map(opt => `
-                <button style="background: ${config.secondary_color}; color: white;" 
-                  class="py-6 rounded-2xl text-2xl font-black shadow-lg hover:opacity-90"
+                <button style="background: ${config.secondary_color};" 
+                  class="py-6 rounded-2xl text-2xl font-black shadow-lg hover:opacity-90 text-white"
                   onclick="handleQuizAnswer('${opt.name}', '${target.name}', this)">${opt.name}</button>`).join('')}
             </div>
             <div id="quiz-feedback" class="mt-8 text-3xl font-black min-h-[3rem]"></div>
@@ -220,18 +231,27 @@
       setTimeout(() => el.classList.remove('flipped'), 600);
     };
 
-    window.handleMemoryClick = function(el, name, emoji) {
+    window.handleMemoryClick = function(el, index) {
       if (lockBoard || el.classList.contains('matched') || el === firstCard) return;
+      
       const config = getConfig();
-      el.innerHTML = `<div class="flex flex-col items-center"><span class="text-4xl">${emoji}</span><span class="text-sm mt-1">${name}</span></div>`;
+      const item = memoryPairs[index];
+      
+      el.innerHTML = `<div class="flex flex-col items-center"><span class="text-4xl">${item.emoji}</span><span class="text-sm mt-1">${item.name}</span></div>`;
       el.style.background = config.card_color;
       el.style.color = config.text_color;
-      speakName(name);
+      speakName(item.name);
 
-      if (!firstCard) { firstCard = el; firstCard.dataset.name = name; return; }
+      if (!firstCard) {
+        firstCard = el;
+        firstCard.dataset.index = index;
+        return;
+      }
 
       lockBoard = true;
-      if (el.dataset.name === name || name === firstCard.dataset.name) {
+      const firstItem = memoryPairs[firstCard.dataset.index];
+      
+      if (firstItem.name === item.name) {
         score += 10;
         matchesFound++;
         el.classList.add('matched');
@@ -269,9 +289,6 @@
       }
     };
 
-    window.switchMode = (mode) => { currentMode = mode; firstCard = null; lockBoard = false; render(); };
-    window.switchLevel = (lvl) => { currentLevel = lvl; render(); };
-
     function render() {
       const app = document.getElementById('app');
       if (currentMode === 'cards') app.innerHTML = renderCardsMode();
@@ -279,16 +296,18 @@
       else app.innerHTML = renderQuizMode();
     }
 
-    window.elementSdk.init({
-      defaultConfig: defaultConfig,
-      onConfigChange: () => render(),
-      mapToCapabilities: (config) => ({
-        recolorables: [
-          { get: () => config.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig(config); } },
-          { get: () => config.primary_color, set: (v) => { config.primary_color = v; window.elementSdk.setConfig(config); } }
-        ]
-      })
-    });
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig: defaultConfig,
+        onConfigChange: () => render(),
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            { get: () => config.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig(config); } },
+            { get: () => config.primary_color, set: (v) => { config.primary_color = v; window.elementSdk.setConfig(config); } }
+          ]
+        })
+      });
+    }
 
     render();
   </script>
