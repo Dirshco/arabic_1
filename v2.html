@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="ar" dir="rtl" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تعلم الأسماء</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
+    
+    * {
+      font-family: 'Tajawal', sans-serif;
+    }
+    
+    .card {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .card:hover {
+      transform: translateY(-8px) scale(1.05);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+    
+    .card.flipped {
+      animation: flip 0.6s ease;
+    }
+    
+    @keyframes flip {
+      0% { transform: rotateY(0deg); }
+      50% { transform: rotateY(90deg); }
+      100% { transform: rotateY(0deg); }
+    }
+    
+    .star {
+      animation: twinkle 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes twinkle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+    
+    .game-mode-btn {
+      transition: all 0.3s ease;
+    }
+    
+    .game-mode-btn:hover {
+      transform: scale(1.05);
+    }
+    
+    .game-mode-btn.active {
+      transform: scale(1.1);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    
+    .balloon {
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-15px); }
+    }
+
+    .level-badge {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="w-full h-full overflow-auto"></div>
+  <script>
+    const defaultConfig = {
+      app_title: "🎮 تعلم الأسماء 🎮",
+      game_instruction: "اضغط على البطاقات لسماع الأسماء!",
+      background_color: "#FFE5F1",
+      card_color: "#FFFFFF",
+      primary_color: "#FF6B9D",
+      secondary_color: "#4ECDC4",
+      text_color: "#2C3E50"
+    };
+
+    const namesLevel1 = [
+      { name: "ماكي", emoji: "🌸", color: "#FF6B9D" },
+      { name: "سارة", emoji: "🌺", color: "#FFB6C1" },
+      { name: "أحمد", emoji: "⚽", color: "#4ECDC4" },
+      { name: "لانا", emoji: "🦋", color: "#9B59B6" },
+      { name: "رنا", emoji: "🌟", color: "#F39C12" },
+      { name: "زينب", emoji: "🌷", color: "#E74C3C" },
+      { name: "محمد", emoji: "🚀", color: "#3498DB" },
+      { name: "حسام", emoji: "⚡", color: "#2ECC71" },
+      { name: "رزان", emoji: "🎨", color: "#E67E22" },
+      { name: "ريناد", emoji: "🎵", color: "#1ABC9C" },
+      { name: "آية", emoji: "📚", color: "#9B59B6" },
+      { name: "مايا", emoji: "🌈", color: "#FF6B9D" },
+      { name: "يارا", emoji: "🎀", color: "#FFB6C1" },
+      { name: "إياد", emoji: "🎪", color: "#F39C12" },
+      { name: "فارس", emoji: "🎯", color: "#E74C3C" },
+      { name: "ياسمين", emoji: "🌻", color: "#2ECC71" }
+    ];
+
+    const namesLevel2 = [
+      { name: "واثق", emoji: "💪", color: "#FF6B9D" },
+      { name: "هناء", emoji: "😊", color: "#FFB6C1" },
+      { name: "سماح", emoji: "🌙", color: "#4ECDC4" },
+      { name: "سهير", emoji: "✨", color: "#9B59B6" },
+      { name: "سحر", emoji: "🎭", color: "#F39C12" },
+      { name: "نادر", emoji: "💎", color: "#E74C3C" },
+      { name: "ريم", emoji: "🦌", color: "#3498DB" },
+      { name: "عمر", emoji: "🏃", color: "#2ECC71" },
+      { name: "هشام", emoji: "🎓", color: "#E67E22" },
+      { name: "عصمت", emoji: "🛡️", color: "#1ABC9C" },
+      { name: "مالك", emoji: "👑", color: "#9B59B6" },
+      { name: "ياسين", emoji: "🕌", color: "#FF6B9D" },
+      { name: "أيمن", emoji: "🌟", color: "#FFB6C1" },
+      { name: "ز��ن", emoji: "🎨", color: "#F39C12" },
+      { name: "زياد", emoji: "🚴", color: "#E74C3C" },
+      { name: "عدن", emoji: "🌊", color: "#2ECC71" },
+      { name: "إليان", emoji: "🎵", color: "#4ECDC4" }
+    ];
+
+    let currentLevel = 1;
+    let currentMode = 'cards';
+    let score = 0;
+    let quizAnswers = [];
+
+    function getCurrentNames() {
+      return currentLevel === 1 ? namesLevel1 : namesLevel2;
+    }
+
+    function speakName(name) {
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(name);
+        utterance.lang = 'ar-SA';
+        utterance.rate = 0.8;
+        speechSynthesis.speak(utterance);
+      }
+    }
+
+    function shuffleArray(array) {
+      const newArray = [...array];
+      for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+      }
+      return newArray;
+    }
+
+    function renderLevelButtons() {
+      const config = window.elementSdk.config;
+      return `
+        <div class="flex justify-center gap-4 mb-6">
+          <button 
+            style="background: ${currentLevel === 1 ? config.primary_color : config.secondary_color}; color: white;"
+            class="level-badge ${currentLevel === 1 ? 'active' : ''} px-8 py-4 rounded-full text-2xl font-black shadow-lg"
+            onclick="switchLevel(1)">
+            🥇 المستوى 1
+          </button>
+          <button 
+            style="background: ${currentLevel === 2 ? config.primary_color : config.secondary_color}; color: white;"
+            class="level-badge ${currentLevel === 2 ? 'active' : ''} px-8 py-4 rounded-full text-2xl font-black shadow-lg"
+            onclick="switchLevel(2)">
+            🥈 المستوى 2
+          </button>
+        </div>
+      `;
+    }
+
+    function renderCardsMode() {
+      const config = window.elementSdk.config;
+      const names = getCurrentNames();
+      return `
+        <div style="background: ${config.background_color};" class="w-full min-h-full p-6">
+          <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-8">
+              <h1 style="color: ${config.primary_color};" class="text-5xl font-black mb-4 balloon">${config.app_title}</h1>
+              <p style="color: ${config.text_color};" class="text-2xl font-bold">${config.game_instruction}</p>
+              <div class="flex justify-center gap-2 mt-4">
+                <span class="star text-4xl">⭐</span>
+                <span class="star text-4xl" style="animation-delay: 0.3s;">⭐</span>
+                <span class="star text-4xl" style="animation-delay: 0.6s;">⭐</span>
+              </div>
+            </div>
+
+            ${renderLevelButtons()}
+            ${renderGameModeButtons()}
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
+              ${names.map((item, index) => `
+                <div class="card rounded-3xl shadow-lg p-6 text-center" 
+                     style="background: ${config.card_color}; border: 4px solid ${item.color};"
+                     onclick="handleCardClick(${index})">
+                  <div class="text-6xl mb-4">${item.emoji}</div>
+                  <h3 style="color: ${config.text_color};" class="text-3xl font-black">${item.name}</h3>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderMemoryMode() {
+      const config = window.elementSdk.config;
+      const names = getCurrentNames();
+      const shuffled = shuffleArray([...names.slice(0, 8), ...names.slice(0, 8)]);
+      
+      return `
+        <div style="background: ${config.background_color};" class="w-full min-h-full p-6">
+          <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-8">
+              <h1 style="color: ${config.primary_color};" class="text-5xl font-black mb-4">🎮 لعبة الذاكرة 🎮</h1>
+              <p style="color: ${config.text_color};" class="text-2xl font-bold">ابحث عن الأزواج المتطابقة!</p>
+              <div style="background: ${config.secondary_color};" class="inline-block px-8 py-3 rounded-full mt-4">
+                <p style="color: white;" class="text-3xl font-black">النقاط: <span id="score">${score}</span> 🎯</p>
+              </div>
+            </div>
+
+            ${renderLevelButtons()}
+            ${renderGameModeButtons()}
+
+            <div class="grid grid-cols-4 gap-4 mt-8" id="memory-grid">
+              ${shuffled.map((item, index) => `
+                <div class="card rounded-2xl shadow-lg p-6 text-center cursor-pointer" 
+                     style="background: ${config.primary_color};"
+                     data-index="${index}"
+                     data-name="${item.name}"
+                     onclick="handleMemoryClick(${index}, '${item.name}', '${item.emoji}')">
+                  <div class="text-5xl">❓</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderQuizMode() {
+      const config = window.elementSdk.config;
+      const names = getCurrentNames();
+      const randomName = names[Math.floor(Math.random() * names.length)];
+      const options = shuffleArray([
+        randomName,
+        ...shuffleArray(names.filter(n => n.name !== randomName.name)).slice(0, 3)
+      ]);
+
+      return `
+        <div style="background: ${config.background_color};" class="w-full min-h-full p-6">
+          <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-8">
+              <h1 style="color: ${config.primary_color};" class="text-5xl font-black mb-4">📝 اختبار الأسماء 📝</h1>
+              <p style="color: ${config.text_color};" class="text-2xl font-bold">اختر الاسم الصحيح!</p>
+              <div style="background: ${config.secondary_color};" class="inline-block px-8 py-3 rounded-full mt-4">
+                <p style="color: white;" class="text-3xl font-black">النقاط: <span id="quiz-score">${score}</span> 🏆</p>
+              </div>
+            </div>
+
+            ${renderLevelButtons()}
+            ${renderGameModeButtons()}
+
+            <div style="background: ${config.card_color}; border: 6px solid ${config.primary_color};" 
+                 class="rounded-3xl shadow-2xl p-12 text-center mt-8">
+              <div class="text-9xl mb-8">${randomName.emoji}</div>
+              <p style="color: ${config.text_color};" class="text-3xl font-bold mb-8">ما هو هذا الاسم؟</p>
+              
+              <div class="grid grid-cols-2 gap-6">
+                ${options.map(option => `
+                  <button 
+                    style="background: ${config.secondary_color}; color: white;"
+                    class="game-mode-btn rounded-2xl py-6 text-3xl font-black shadow-lg hover:shadow-xl"
+                    onclick="handleQuizAnswer('${option.name}', '${randomName.name}', this)">
+                    ${option.name}
+                  </button>
+                `).join('')}
+              </div>
+              
+              <div id="quiz-feedback" class="mt-8 text-3xl font-black"></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderGameModeButtons() {
+      const config = window.elementSdk.config;
+      return `
+        <div class="flex justify-center gap-4 flex-wrap">
+          <button 
+            style="background: ${currentMode === 'cards' ? config.primary_color : config.secondary_color}; color: white;"
+            class="game-mode-btn ${currentMode === 'cards' ? 'active' : ''} px-8 py-4 rounded-full text-2xl font-black shadow-lg"
+            onclick="switchMode('cards')">
+            🃏 البطاقات
+          </button>
+          <button 
+            style="background: ${currentMode === 'memory' ? config.primary_color : config.secondary_color}; color: white;"
+            class="game-mode-btn ${currentMode === 'memory' ? 'active' : ''} px-8 py-4 rounded-full text-2xl font-black shadow-lg"
+            onclick="switchMode('memory')">
+            🧠 الذاكرة
+          </button>
+          <button 
+            style="background: ${currentMode === 'quiz' ? config.primary_color : config.secondary_color}; color: white;"
+            class="game-mode-btn ${currentMode === 'quiz' ? 'active' : ''} px-8 py-4 rounded-full text-2xl font-black shadow-lg"
+            onclick="switchMode('quiz')">
+            📝 الاختبار
+          </button>
+        </div>
+      `;
+    }
+
+    function render() {
+      const app = document.getElementById('app');
+      if (currentMode === 'cards') {
+        app.innerHTML = renderCardsMode();
+      } else if (currentMode === 'memory') {
+        app.innerHTML = renderMemoryMode();
+      } else if (currentMode === 'quiz') {
+        app.innerHTML = renderQuizMode();
+      }
+    }
+
+    window.handleCardClick = function(index) {
+      const card = event.currentTarget;
+      card.classList.add('flipped');
+      const names = getCurrentNames();
+      speakName(names[index].name);
+      
+      setTimeout(() => {
+        card.classList.remove('flipped');
+      }, 600);
+    };
+
+    let firstCard = null;
+    let secondCard = null;
+    let lockBoard = false;
+
+    window.handleMemoryClick = function(index, name, emoji) {
+      if (lockBoard) return;
+      
+      const card = event.currentTarget;
+      if (card.classList.contains('matched')) return;
+      
+      const config = window.elementSdk.config;
+      card.innerHTML = `<div class="text-5xl">${emoji}</div><div style="color: ${config.text_color};" class="text-xl font-bold mt-2">${name}</div>`;
+      card.style.background = config.card_color;
+      speakName(name);
+      
+      if (!firstCard) {
+        firstCard = { element: card, name: name };
+        return;
+      }
+      
+      secondCard = { element: card, name: name };
+      lockBoard = true;
+      
+      if (firstCard.name === secondCard.name && firstCard.element !== secondCard.element) {
+        score += 10;
+        document.getElementById('score').textContent = score;
+        firstCard.element.classList.add('matched');
+        secondCard.element.classList.add('matched');
+        firstCard.element.style.border = '4px solid #2ECC71';
+        secondCard.element.style.border = '4px solid #2ECC71';
+        resetMemoryBoard();
+      } else {
+        setTimeout(() => {
+          firstCard.element.innerHTML = '<div class="text-5xl">❓</div>';
+          firstCard.element.style.background = config.primary_color;
+          secondCard.element.innerHTML = '<div class="text-5xl">❓</div>';
+          secondCard.element.style.background = config.primary_color;
+          resetMemoryBoard();
+        }, 1000);
+      }
+    };
+
+    function resetMemoryBoard() {
+      firstCard = null;
+      secondCard = null;
+      lockBoard = false;
+    }
+
+    window.handleQuizAnswer = function(selected, correct, button) {
+      const config = window.elementSdk.config;
+      const feedback = document.getElementById('quiz-feedback');
+      
+      if (selected === correct) {
+        button.style.background = '#2ECC71';
+        feedback.innerHTML = '🎉 صحيح! ممتاز! 🎉';
+        feedback.style.color = '#2ECC71';
+        score += 5;
+        document.getElementById('quiz-score').textContent = score;
+        speakName(correct);
+        
+        setTimeout(() => {
+          render();
+        }, 2000);
+      } else {
+        button.style.background = '#E74C3C';
+        feedback.innerHTML = `❌ خطأ! الإجابة الصحيحة: ${correct}`;
+        feedback.style.color = '#E74C3C';
+        speakName(correct);
+      }
+    };
+
+    window.switchMode = function(mode) {
+      currentMode = mode;
+      render();
+    };
+
+    window.switchLevel = function(level) {
+      currentLevel = level;
+      render();
+    };
+
+    async function onConfigChange(config) {
+      render();
+    }
+
+    const element = {
+      defaultConfig: defaultConfig,
+      onConfigChange: onConfigChange,
+      mapToCapabilities: (config) => ({
+        recolorables: [
+          {
+            get: () => config.background_color || defaultConfig.background_color,
+            set: (value) => {
+              config.background_color = value;
+              window.elementSdk.setConfig({ background_color: value });
+            }
+          },
+          {
+            get: () => config.card_color || defaultConfig.card_color,
+            set: (value) => {
+              config.card_color = value;
+              window.elementSdk.setConfig({ card_color: value });
+            }
+          },
+          {
+            get: () => config.text_color || defaultConfig.text_color,
+            set: (value) => {
+              config.text_color = value;
+              window.elementSdk.setConfig({ text_color: value });
+            }
+          },
+          {
+            get: () => config.primary_color || defaultConfig.primary_color,
+            set: (value) => {
+              config.primary_color = value;
+              window.elementSdk.setConfig({ primary_color: value });
+            }
+          },
+          {
+            get: () => config.secondary_color || defaultConfig.secondary_color,
+            set: (value) => {
+              config.secondary_color = value;
+              window.elementSdk.setConfig({ secondary_color: value });
+            }
+          }
+        ],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      }),
+      mapToEditPanelValues: (config) => new Map([
+        ["app_title", config.app_title || defaultConfig.app_title],
+        ["game_instruction", config.game_instruction || defaultConfig.game_instruction]
+      ])
+    };
+
+    window.elementSdk.init(element);
+    render();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b2c58e00293e0b5',t:'MTc2NjUzOTk3MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
