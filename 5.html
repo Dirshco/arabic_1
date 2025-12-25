@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arabic Adventure</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Tajawal:wght@700;900&display=swap');
+    
+    :root {
+      --duo-green: #58cc02;
+      --duo-green-border: #46a302;
+      --duo-error: #ff4b4b;
+    }
+
+    * { font-family: 'Nunito', 'Tajawal', sans-serif; box-sizing: border-box; }
+    body { background-color: #fff; color: #4b4b4b; margin: 0; }
+
+    /* Chunky Duolingo Style Buttons */
+    .duo-btn {
+      position: relative;
+      transition: all 0.1s;
+      border-bottom-width: 4px;
+    }
+
+    .duo-btn:active:not(:disabled) {
+      transform: translateY(2px);
+      border-bottom-width: 2px;
+    }
+
+    #progressInner { transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+    .option-card {
+      border: 2px solid #e5e5e5;
+      border-bottom-width: 4px;
+      transition: all 0.1s;
+    }
+    .option-card.selected {
+      background-color: #ddf4ff;
+      border-color: #84d8ff;
+      color: #1899d6;
+    }
+
+    .shake { animation: shake 0.4s ease-in-out; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+  </style>
+ </head>
+ <body class="h-full overflow-hidden bg-gray-50">
+  <div id="app" class="h-full flex flex-col max-w-xl mx-auto border-x border-gray-100 shadow-xl bg-white relative">
+    
+    <div class="px-4 pt-6 pb-2 flex items-center gap-4">
+      <div class="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+        <div id="progressInner" class="h-full bg-green-500" style="width: 0%"></div>
+      </div>
+      <div class="flex items-center gap-1">
+        <span class="text-orange-500 font-black">🔥</span>
+        <span id="scoreDisplay" class="font-black text-gray-500">0</span>
+      </div>
+    </div>
+
+    <div id="gameArea" class="flex-1 px-6 py-8 flex flex-col justify-between overflow-y-auto">
+      <div id="questionView">
+        <h2 id="promptText" class="text-2xl font-black text-gray-700 mb-8">What sound does this make?</h2>
+        
+        <div class="flex justify-center mb-8">
+          <div id="letterDisplay" class="w-40 h-40 rounded-3xl border-2 border-gray-200 border-b-4 flex items-center justify-center text-8xl font-black text-blue-500 bg-white">
+            ا
+          </div>
+        </div>
+
+        <div id="optionsGrid" class="grid grid-cols-2 gap-3"></div>
+      </div>
+    </div>
+
+    <div class="p-6 border-t border-gray-100 bg-white">
+      <button id="mainBtn" onclick="handleMainAction()" disabled class="duo-btn w-full py-4 bg-gray-200 border-gray-300 text-gray-400 text-xl font-black rounded-2xl uppercase tracking-wider cursor-not-allowed">
+        Check
+      </button>
+    </div>
+
+    <div id="feedbackPanel" class="absolute bottom-0 left-0 w-full p-6 translate-y-full transition-transform duration-300 z-50"></div>
+  </div>
+
+  <script>
+    const allLetters = [
+      // Level 1: Basics
+      { letter: 'ا', name: 'Alif', level: 1 }, { letter: 'ب', name: 'Ba', level: 1 }, { letter: 'ت', name: 'Ta', level: 1 }, 
+      { letter: 'ث', name: 'Tha', level: 1 }, { letter: 'ج', name: 'Jim', level: 1 }, { letter: 'ح', name: 'Ha', level: 1 }, { letter: 'خ', name: 'Kha', level: 1 },
+      // Level 2: Middle
+      { letter: 'د', name: 'Dal', level: 2 }, { letter: 'ذ', name: 'Dhal', level: 2 }, { letter: 'ر', name: 'Ra', level: 2 },
+      { letter: 'ز', name: 'Zay', level: 2 }, { letter: 'س', name: 'Seen', level: 2 }, { letter: 'ش', name: 'Sheen', level: 2 }, { letter: 'ص', name: 'Sad', level: 2 },
+      // Level 3: Advanced
+      { letter: 'ض', name: 'Dad', level: 3 }, { letter: 'ط', name: 'Taa', level: 3 }, { letter: 'ظ', name: 'Zha', level: 3 },
+      { letter: 'ع', name: 'Ain', level: 3 }, { letter: 'غ', name: 'Ghain', level: 3 }, { letter: 'ف', name: 'Fa', level: 3 }, { letter: 'ق', name: 'Qaf', level: 3 },
+      // Level 4: Ending
+      { letter: 'ك', name: 'Kaf', level: 4 }, { letter: 'ل', name: 'Lam', level: 4 }, { letter: 'م', name: 'Meem', level: 4 },
+      { letter: 'ن', name: 'Noon', level: 4 }, { letter: 'ه', name: 'Ha', level: 4 }, { letter: 'و', name: 'Waw', level: 4 }, { letter: 'ي', name: 'Ya', level: 4 }
+    ];
+
+    const messages = ['Amazing! 🚀', 'Great! 🌟', 'Perfect! ✨', 'Brilliant! 💎', 'Fantastic! 🎊', 'Well Done! 👏', 'Superb! 🎯', 'Excellent! 🌈', 'Wonderful! 💫', 'Incredible! 🔥', 'Awesome! 😎', 'Magnificent! 👑'];
+    
+    let currentIndex = 0;
+    let selectedOption = null;
+    let isReviewing = false;
+    let score = 0;
+
+    function speak(text) {
+      if ('speechSynthesis' in window) {
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'ar-SA';
+        window.speechSynthesis.speak(msg);
+      }
+    }
+
+    function renderQuestion() {
+      const current = allLetters[currentIndex];
+      document.getElementById('letterDisplay').textContent = current.letter;
+      document.getElementById('progressInner').style.width = `${(currentIndex / allLetters.length) * 100}%`;
+      
+      // Generate options (Correct + 3 random)
+      const others = allLetters.filter(l => l.name !== current.name);
+      const choices = [current.name, ...others.sort(() => 0.5 - Math.random()).slice(0, 3).map(l => l.name)].sort(() => 0.5 - Math.random());
+
+      const grid = document.getElementById('optionsGrid');
+      grid.innerHTML = '';
+      choices.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'option-card p-4 rounded-2xl flex flex-col items-center justify-center cursor-pointer font-black text-lg bg-white';
+        btn.innerHTML = `<span class="text-gray-400 text-xs mb-1 uppercase">Sound</span>${opt}`;
+        btn.onclick = () => selectOption(opt, btn);
+        grid.appendChild(btn);
+      });
+
+      setMainBtnState('select');
+      isReviewing = false;
+    }
+
+    function selectOption(opt, el) {
+      if (isReviewing) return;
+      selectedOption = opt;
+      document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      setMainBtnState('ready');
+    }
+
+    function setMainBtnState(state) {
+      const btn = document.getElementById('mainBtn');
+      if (state === 'select') {
+        btn.disabled = true;
+        btn.className = "duo-btn w-full py-4 bg-gray-200 border-gray-300 text-gray-400 text-xl font-black rounded-2xl uppercase cursor-not-allowed";
+        btn.textContent = "Check";
+      } else if (state === 'ready') {
+        btn.disabled = false;
+        btn.className = "duo-btn w-full py-4 bg-[#58cc02] border-[#46a302] text-white text-xl font-black rounded-2xl uppercase cursor-pointer";
+        btn.textContent = "Check";
+      } else {
+        btn.textContent = "Continue";
+      }
+    }
+
+    function handleMainAction() {
+      if (!isReviewing) checkAnswer();
+      else nextQuestion();
+    }
+
+    function checkAnswer() {
+      isReviewing = true;
+      const current = allLetters[currentIndex];
+      const isCorrect = selectedOption === current.name;
+      const panel = document.getElementById('feedbackPanel');
+
+      if (isCorrect) {
+        score += 10;
+        document.getElementById('scoreDisplay').textContent = score;
+        speak(current.letter);
+        panel.className = "absolute bottom-0 left-0 w-full p-8 bg-[#d7ffb8] text-[#58a700] z-50 translate-y-0";
+        panel.innerHTML = `<h3 class="text-2xl font-black mb-1">${messages[Math.floor(Math.random()*messages.length)]}</h3>`;
+      } else {
+        document.getElementById('letterDisplay').parentElement.classList.add('shake');
+        setTimeout(() => document.getElementById('letterDisplay').parentElement.classList.remove('shake'), 400);
+        panel.className = "absolute bottom-0 left-0 w-full p-8 bg-[#ffdfe0] text-[#ea2b2b] z-50 translate-y-0";
+        panel.innerHTML = `<h3 class="text-xl font-black">Correct solution:</h3><p class="font-bold">${current.name}</p>`;
+      }
+      
+      const btn = document.getElementById('mainBtn');
+      btn.className = isCorrect ? 
+        "duo-btn w-full py-4 bg-[#58cc02] border-[#46a302] text-white text-xl font-black rounded-2xl uppercase" :
+        "duo-btn w-full py-4 bg-[#ff4b4b] border-[#d33131] text-white text-xl font-black rounded-2xl uppercase";
+      btn.textContent = "Continue";
+    }
+
+    function nextQuestion() {
+      document.getElementById('feedbackPanel').classList.add('translate-y-full');
+      currentIndex++;
+      if (currentIndex < allLetters.length) {
+        renderQuestion();
+      } else {
+        showSuccess();
+      }
+    }
+
+    function showSuccess() {
+      document.getElementById('gameArea').innerHTML = `
+        <div class="flex flex-col items-center justify-center h-full text-center">
+          <div class="text-9xl mb-4">🏆</div>
+          <h2 class="text-4xl font-black text-orange-500 mb-2">Legendary!</h2>
+          <p class="text-gray-500 font-bold mb-8">You mastered all 28 letters.</p>
+          <button onclick="location.reload()" class="duo-btn w-full py-4 bg-[#1cb0f6] border-[#1899d6] text-white text-xl font-black rounded-2xl uppercase">Practice Again</button>
+        </div>`;
+      document.getElementById('mainBtn').style.display = 'none';
+      document.getElementById('progressInner').style.width = '100%';
+    }
+
+    renderQuestion();
+  </script>
+ </body>
+</html>
