@@ -188,7 +188,9 @@
         btn.classList.add('correct-animation');
         btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
         createConfetti();
-        showPopup(['Amazing! 🚀', 'Great! 🌟', 'Perfect! ✨'][Math.floor(Math.random() * 3)]);
+        showPopup(['Amazing! 🚀', 'Great! 🌟', 'Perfect! ✨', 'Brilliant! 💎', 
+      'Fantastic! 🎊', 'Well Done! 👏', 'Superb! 🎯', 'Excellent! 🌈', 
+      'Wonderful! 💫', 'Incredible! 🔥', 'Awesome! 😎', 'Magnificent! 👑'][Math.floor(Math.random() * 3)]);
         
         setTimeout(() => {
           currentIndex++;
@@ -237,3 +239,4 @@
   </script>
  </body>
 </html>
+
