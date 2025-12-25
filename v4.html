@@ -5,141 +5,72 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Arabic Alphabet Adventure</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="/_sdk/element_sdk.js"></script>
-  <script src="/_sdk/data_sdk.js"></script>
+  <script>
+    if (!window.elementSdk) {
+      window.elementSdk = {
+        init: (cfg) => { window.elementSdk.config = cfg.defaultConfig; cfg.onConfigChange(cfg.defaultConfig); },
+        setConfig: (cfg) => { Object.assign(window.elementSdk.config, cfg); }
+      };
+    }
+    if (!window.dataSdk) {
+      window.dataSdk = {
+        init: (h) => { h.onDataChanged([]); return { isOk: true }; },
+        create: (d) => ({ isOk: true }),
+        update: (d) => ({ isOk: true })
+      };
+    }
+  </script>
   <style>
-    body {
-      box-sizing: border-box;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
     
-    .card-container {
-      perspective: 1000px;
-    }
+    * { font-family: 'Tajawal', Arial, sans-serif; box-sizing: border-box; }
     
-    .card {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      transition: transform 0.6s;
-      transform-style: preserve-3d;
+    .card-container { perspective: 1000px; height: 400px; width: 100%; max-width: 320px; margin: 0 auto; }
+    .card { 
+        position: relative; width: 100%; height: 100%; 
+        transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); 
+        transform-style: preserve-3d; 
     }
-    
-    .card.flipped {
-      transform: rotateY(180deg);
-    }
+    .card.flipped { transform: rotateY(180deg); }
     
     .card-face {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      backface-visibility: hidden;
-      border-radius: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      position: absolute; width: 100%; height: 100%;
+      backface-visibility: hidden; -webkit-backface-visibility: hidden;
+      border-radius: 1.5rem; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
     }
     
-    .card-back {
-      transform: rotateY(180deg);
-    }
-    
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-20px); }
-    }
-    
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-    }
-    
-    @keyframes starBurst {
-      0% { transform: scale(0) rotate(0deg); opacity: 0; }
-      50% { transform: scale(1.5) rotate(180deg); opacity: 1; }
-      100% { transform: scale(1) rotate(360deg); opacity: 1; }
-    }
-    
-    @keyframes slideIn {
-      from { transform: translateY(-100px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-    
-    .bounce {
-      animation: bounce 0.5s ease;
-    }
-    
-    .spin {
-      animation: spin 0.5s ease;
-    }
-    
-    .pulse {
-      animation: pulse 0.3s ease;
-    }
-    
-    .star-burst {
-      animation: starBurst 0.6s ease;
-    }
-    
-    .slide-in {
-      animation: slideIn 0.5s ease;
-    }
+    .card-back { transform: rotateY(180deg); }
     
     .confetti {
-      position: fixed;
-      pointer-events: none;
-      z-index: 1000;
+      position: fixed; pointer-events: none; z-index: 1000;
+      width: 10px; height: 10px; animation: fall 3s linear forwards;
     }
     
-    @keyframes confettiFall {
-      to {
-        transform: translateY(100%) rotate(360deg);
-        opacity: 0;
-      }
+    @keyframes fall {
+      to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
     }
-    
-    .progress-bar {
-      transition: width 0.5s ease;
-    }
-    
-    .letter-grid-item {
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .letter-grid-item:hover {
-      transform: scale(1.1);
-    }
-    
-    .star-icon {
-      filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.5));
+
+    .pulse { animation: pulse 0.5s ease-in-out; }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
     }
   </style>
-  <style>@view-transition { navigation: auto; }</style>
  </head>
  <body class="h-full">
-  <div id="app" class="h-full w-full overflow-auto"></div>
+  <div id="app" class="h-full w-full overflow-auto bg-indigo-600"></div>
+
   <script>
     const defaultConfig = {
-      background_color: "#6366F1",
+      background_color: "#4F46E5",
       card_color: "#FFFFFF",
       primary_button_color: "#10B981",
       secondary_button_color: "#F59E0B",
       text_color: "#1F2937",
       game_title: "🌟 Arabic Alphabet Adventure! 🌟",
-      instruction_text: "Flip cards and earn stars! Can you master all 28 letters?",
-      achievement_text: "Amazing! You earned a star! ⭐",
-      flip_button_text: "🔄 Flip & Learn",
-      know_it_button: "✨ I Know This!",
-      practice_button: "🔁 Practice More",
-      font_family: "Arial",
-      font_size: 16
+      instruction_text: "Flip cards and earn stars! Can you master all 28 letters?"
     };
 
     const arabicLetters = [
@@ -178,533 +109,116 @@
     let userProgress = [];
     let totalStars = 0;
     let showingGrid = false;
-    let isLoading = false;
 
-    const dataHandler = {
-      onDataChanged(data) {
-        userProgress = data;
-        totalStars = data.reduce((sum, record) => sum + (record.stars_earned || 0), 0);
-        updateProgressDisplay();
+    function speak(text) {
+      if ('speechSynthesis' in window) {
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'ar-SA';
+        speechSynthesis.speak(msg);
       }
-    };
-
-    async function onConfigChange(config) {
-      const app = document.getElementById('app');
-      const customFont = config.font_family || defaultConfig.font_family;
-      const baseFontStack = 'Arial, sans-serif';
-      const baseSize = config.font_size || defaultConfig.font_size;
-      
-      if (app) {
-        app.style.background = config.background_color || defaultConfig.background_color;
-        app.style.fontFamily = `${customFont}, ${baseFontStack}`;
-      }
-      
-      const titleEl = document.getElementById('game-title');
-      if (titleEl) {
-        titleEl.textContent = config.game_title || defaultConfig.game_title;
-        titleEl.style.color = '#FFFFFF';
-        titleEl.style.fontSize = `${baseSize * 1.75}px`;
-      }
-      
-      const instructionEl = document.getElementById('instruction-text');
-      if (instructionEl) {
-        instructionEl.textContent = config.instruction_text || defaultConfig.instruction_text;
-        instructionEl.style.color = '#FFFFFF';
-        instructionEl.style.fontSize = `${baseSize}px`;
-      }
-      
-      const achievementEl = document.getElementById('achievement-message');
-      if (achievementEl) {
-        achievementEl.textContent = config.achievement_text || defaultConfig.achievement_text;
-        achievementEl.style.fontSize = `${baseSize * 1.25}px`;
-      }
-      
-      updateButtonStyles(config, baseSize);
-      updateCardStyles(config, baseSize);
-    }
-
-    function updateButtonStyles(config, baseSize) {
-      const flipBtn = document.getElementById('flip-btn');
-      if (flipBtn) {
-        flipBtn.textContent = config.flip_button_text || defaultConfig.flip_button_text;
-        flipBtn.style.background = config.primary_button_color || defaultConfig.primary_button_color;
-        flipBtn.style.fontSize = `${baseSize * 1.125}px`;
-      }
-      
-      const knowBtn = document.getElementById('know-btn');
-      if (knowBtn) {
-        knowBtn.textContent = config.know_it_button || defaultConfig.know_it_button;
-        knowBtn.style.background = config.primary_button_color || defaultConfig.primary_button_color;
-        knowBtn.style.fontSize = `${baseSize}px`;
-      }
-      
-      const practiceBtn = document.getElementById('practice-btn');
-      if (practiceBtn) {
-        practiceBtn.textContent = config.practice_button || defaultConfig.practice_button;
-        practiceBtn.style.background = config.secondary_button_color || defaultConfig.secondary_button_color;
-        practiceBtn.style.fontSize = `${baseSize}px`;
-      }
-    }
-
-    function updateCardStyles(config, baseSize) {
-      const cardFronts = document.querySelectorAll('.card-front');
-      const cardBacks = document.querySelectorAll('.card-back');
-      
-      cardFronts.forEach(card => {
-        card.style.background = config.card_color || defaultConfig.card_color;
-      });
-      
-      cardBacks.forEach(card => {
-        card.style.background = config.card_color || defaultConfig.card_color;
-      });
-      
-      const letterElements = document.querySelectorAll('.letter-display');
-      letterElements.forEach(el => {
-        el.style.color = config.text_color || defaultConfig.text_color;
-        el.style.fontSize = `${baseSize * 7}px`;
-      });
-      
-      const nameElements = document.querySelectorAll('.letter-name');
-      nameElements.forEach(el => {
-        el.style.color = config.text_color || defaultConfig.text_color;
-        el.style.fontSize = `${baseSize * 1.5}px`;
-      });
-      
-      const soundElements = document.querySelectorAll('.sound-text');
-      soundElements.forEach(el => {
-        el.style.color = config.text_color || defaultConfig.text_color;
-        el.style.fontSize = `${baseSize * 1.125}px`;
-      });
     }
 
     function createConfetti() {
-      const colors = ['#FFD700', '#FF6B9D', '#4ECDC4', '#95E1D3', '#F38181'];
-      for (let i = 0; i < 30; i++) {
-        setTimeout(() => {
-          const confetti = document.createElement('div');
-          confetti.className = 'confetti';
-          confetti.style.left = Math.random() * 100 + '%';
-          confetti.style.top = '-10px';
-          confetti.style.width = '10px';
-          confetti.style.height = '10px';
-          confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
-          confetti.style.animation = `confettiFall ${2 + Math.random()}s linear`;
-          document.body.appendChild(confetti);
-          
-          setTimeout(() => confetti.remove(), 3000);
-        }, i * 50);
+      for(let i=0; i<40; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 60%)`;
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 3000);
       }
     }
 
-    function getLetterProgress(letter) {
-      return userProgress.find(p => p.letter === letter);
-    }
+    window.toggleFlip = function() {
+      isFlipped = !isFlipped;
+      document.getElementById('card-inner').classList.toggle('flipped');
+      if (isFlipped) speak(arabicLetters[currentIndex].letter);
+    };
 
-    function updateProgressDisplay() {
-      const starsEl = document.getElementById('total-stars');
-      if (starsEl) {
-        starsEl.textContent = `⭐ ${totalStars} Stars Collected`;
-        starsEl.classList.add('pulse');
-        setTimeout(() => starsEl.classList.remove('pulse'), 300);
-      }
-      
-      const progressBar = document.getElementById('progress-bar');
-      if (progressBar) {
-        const masteredCount = userProgress.filter(p => p.stars_earned >= 3).length;
-        const percentage = (masteredCount / arabicLetters.length) * 100;
-        progressBar.style.width = percentage + '%';
-      }
-      
-      const progressText = document.getElementById('progress-count');
-      if (progressText) {
-        const masteredCount = userProgress.filter(p => p.stars_earned >= 3).length;
-        progressText.textContent = `${masteredCount}/${arabicLetters.length} Letters Mastered`;
-      }
-    }
-
-    async function markAsKnown() {
-      if (isLoading) return;
-      
-      isLoading = true;
-      const knowBtn = document.getElementById('know-btn');
-      const practiceBtn = document.getElementById('practice-btn');
-      
-      if (knowBtn) knowBtn.disabled = true;
-      if (practiceBtn) practiceBtn.disabled = true;
-      
-      const currentLetter = arabicLetters[currentIndex];
-      const existing = getLetterProgress(currentLetter.letter);
-      
-      if (existing) {
-        const newStars = Math.min((existing.stars_earned || 0) + 1, 5);
-        existing.stars_earned = newStars;
-        existing.times_practiced = (existing.times_practiced || 0) + 1;
-        existing.timestamp = new Date().toISOString();
-        
-        const result = await window.dataSdk.update(existing);
-        if (result.isOk) {
-          showAchievement(newStars);
-        } else {
-          showError("Couldn't save progress. Please try again!");
-        }
-      } else {
-        const result = await window.dataSdk.create({
-          letter: currentLetter.letter,
-          stars_earned: 1,
-          times_practiced: 1,
-          timestamp: new Date().toISOString()
-        });
-        
-        if (result.isOk) {
-          showAchievement(1);
-        } else {
-          showError("Couldn't save progress. Please try again!");
-        }
-      }
-      
-      isLoading = false;
-      if (knowBtn) knowBtn.disabled = false;
-      if (practiceBtn) practiceBtn.disabled = false;
-      
-      setTimeout(() => {
-        nextCard();
-      }, 2000);
-    }
-
-    async function markForPractice() {
-      if (isLoading) return;
-      
-      isLoading = true;
-      const knowBtn = document.getElementById('know-btn');
-      const practiceBtn = document.getElementById('practice-btn');
-      
-      if (knowBtn) knowBtn.disabled = true;
-      if (practiceBtn) practiceBtn.disabled = true;
-      
-      const currentLetter = arabicLetters[currentIndex];
-      const existing = getLetterProgress(currentLetter.letter);
-      
-      if (existing) {
-        existing.times_practiced = (existing.times_practiced || 0) + 1;
-        existing.timestamp = new Date().toISOString();
-        
-        await window.dataSdk.update(existing);
-      } else {
-        await window.dataSdk.create({
-          letter: currentLetter.letter,
-          stars_earned: 0,
-          times_practiced: 1,
-          timestamp: new Date().toISOString()
-        });
-      }
-      
-      isLoading = false;
-      if (knowBtn) knowBtn.disabled = false;
-      if (practiceBtn) practiceBtn.disabled = false;
-      
-      nextCard();
-    }
-
-    function showAchievement(stars) {
-      const achievement = document.getElementById('achievement-banner');
-      if (achievement) {
-        achievement.style.display = 'block';
-        achievement.classList.add('slide-in');
-        
-        const starsDisplay = achievement.querySelector('.stars-display');
-        if (starsDisplay) {
-          starsDisplay.innerHTML = '⭐'.repeat(stars);
-        }
-        
+    window.nextLetter = function(earnedStar) {
+      if (earnedStar) {
+        totalStars++;
         createConfetti();
-        
-        setTimeout(() => {
-          achievement.style.display = 'none';
-          achievement.classList.remove('slide-in');
-        }, 2000);
       }
-    }
+      currentIndex = (currentIndex + 1) % arabicLetters.length;
+      isFlipped = false;
+      render();
+    };
 
-    function showError(message) {
-      const errorEl = document.getElementById('error-message');
-      if (errorEl) {
-        errorEl.textContent = message;
-        errorEl.style.display = 'block';
-        setTimeout(() => {
-          errorEl.style.display = 'none';
-        }, 3000);
-      }
-    }
+    window.goToLetter = function(index) {
+      currentIndex = index;
+      showingGrid = false;
+      isFlipped = false;
+      render();
+    };
 
-    function renderApp() {
+    function render() {
       const app = document.getElementById('app');
-      const config = window.elementSdk.config;
-      const currentLetter = arabicLetters[currentIndex];
-      const progress = getLetterProgress(currentLetter.letter);
-      const stars = progress ? progress.stars_earned : 0;
-      
+      const cfg = window.elementSdk.config || defaultConfig;
+      const current = arabicLetters[currentIndex];
+
       if (showingGrid) {
-        renderLetterGrid();
+        app.innerHTML = `
+          <div class="p-6 text-white">
+            <div class="flex justify-between items-center mb-6">
+               <h2 class="text-2xl font-black">All Letters</h2>
+               <button onclick="showingGrid=false; render()" class="bg-white/20 px-4 py-2 rounded-lg">Back</button>
+            </div>
+            <div class="grid grid-cols-4 gap-3">
+              ${arabicLetters.map((l, i) => `
+                <div onclick="goToLetter(${i})" class="bg-white rounded-xl p-4 text-center cursor-pointer">
+                  <div class="text-3xl font-bold text-gray-800">${l.letter}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
         return;
       }
-      
+
       app.innerHTML = `
-        <div class="w-full" style="min-height: 100%; padding: 1.5rem; display: flex; flex-direction: column;">
-          <!-- Header -->
-          <div style="text-align: center; margin-bottom: 1.5rem;">
-            <h1 id="game-title" class="font-bold" style="color: #FFFFFF; margin-bottom: 0.5rem;">${config.game_title || defaultConfig.game_title}</h1>
-            <p id="instruction-text" style="color: #FFFFFF; opacity: 0.9; margin-bottom: 1rem;">${config.instruction_text || defaultConfig.instruction_text}</p>
-            
-            <!-- Progress Bar -->
-            <div style="background: rgba(255, 255, 255, 0.3); border-radius: 1rem; height: 12px; margin-bottom: 0.5rem; overflow: hidden;">
-              <div id="progress-bar" class="progress-bar" style="background: linear-gradient(90deg, #10B981, #34D399); height: 100%; width: 0%; border-radius: 1rem;"></div>
+        <div class="flex flex-col items-center justify-between min-h-full p-6" style="background:${cfg.background_color}">
+          <div class="text-center text-white">
+            <h1 class="text-2xl font-black mb-1">${cfg.game_title}</h1>
+            <p class="opacity-80">${cfg.instruction_text}</p>
+            <div class="mt-4 inline-block bg-yellow-400 text-indigo-900 px-4 py-1 rounded-full font-bold">
+              ⭐ ${totalStars} Stars
             </div>
-            
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <p id="progress-count" style="color: #FFFFFF; font-size: 0.875rem; font-weight: 600;">0/${arabicLetters.length} Letters Mastered</p>
-              <p id="total-stars" style="color: #FFD700; font-weight: bold; font-size: 1.125rem;">⭐ ${totalStars} Stars Collected</p>
-            </div>
-            
-            <button onclick="toggleGrid()" style="background: rgba(255, 255, 255, 0.2); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; border: none; cursor: pointer; margin-top: 0.5rem; font-size: 0.875rem; font-weight: 600;">
-              📋 View All Letters
-            </button>
           </div>
-          
-          <!-- Achievement Banner -->
-          <div id="achievement-banner" style="display: none; position: fixed; top: 20%; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem 2rem; border-radius: 1rem; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); z-index: 100; text-align: center;">
-            <p id="achievement-message" style="font-weight: bold; margin-bottom: 0.5rem;">${config.achievement_text || defaultConfig.achievement_text}</p>
-            <div class="stars-display" style="font-size: 2rem;"></div>
-          </div>
-          
-          <!-- Error Message -->
-          <div id="error-message" style="display: none; position: fixed; top: 20%; left: 50%; transform: translateX(-50%); background: #EF4444; color: white; padding: 1rem 2rem; border-radius: 0.5rem; z-index: 100;"></div>
-          
-          <!-- Card Area -->
-          <div style="flex: 1; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
-            <div class="card-container" style="width: 100%; max-width: 380px; height: 450px;">
-              <div class="card ${isFlipped ? 'flipped' : ''}" id="card">
-                <!-- Front of Card -->
-                <div class="card-face card-front" style="background: ${config.card_color || defaultConfig.card_color}; padding: 2rem;">
-                  <div style="position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem;">
-                    ${'⭐'.repeat(stars)}
-                  </div>
-                  <div style="font-size: 5rem; margin-bottom: 1rem;" class="spin-on-load">${currentLetter.emoji}</div>
-                  <div class="letter-display" style="font-size: 8rem; font-weight: bold; color: ${config.text_color || defaultConfig.text_color};">${currentLetter.letter}</div>
-                  <div style="margin-top: 1.5rem; padding: 0.75rem 1.5rem; background: #F3F4F6; border-radius: 0.75rem;">
-                    <p style="color: #6B7280; font-size: 0.875rem; font-weight: 600;">Tap flip to learn!</p>
-                  </div>
-                </div>
-                
-                <!-- Back of Card -->
-                <div class="card-face card-back" style="background: ${config.card_color || defaultConfig.card_color}; padding: 2rem;">
-                  <div style="position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem;">
-                    ${'⭐'.repeat(stars)}
-                  </div>
-                  <div style="font-size: 5rem; margin-bottom: 1rem;">${currentLetter.emoji}</div>
-                  <div class="letter-display" style="font-size: 7rem; font-weight: bold; color: ${config.text_color || defaultConfig.text_color}; margin-bottom: 1rem;">${currentLetter.letter}</div>
-                  <div class="letter-name" style="font-size: 1.75rem; font-weight: bold; color: ${config.text_color || defaultConfig.text_color}; margin-bottom: 0.5rem;">${currentLetter.name}</div>
-                  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 0.75rem 1.5rem; border-radius: 0.75rem; margin-bottom: 0.5rem;">
-                    <p class="sound-text" style="color: white; font-weight: 600; font-size: 1.125rem;">🔊 "${currentLetter.sound}"</p>
-                  </div>
-                  <div style="background: #FEF3C7; padding: 0.5rem 1rem; border-radius: 0.5rem;">
-                    <p style="color: #92400E; font-size: 0.875rem; font-weight: 600;">English: "${currentLetter.transliteration}"</p>
-                  </div>
-                </div>
+
+          <div class="card-container my-8">
+            <div class="card" id="card-inner">
+              <div class="card-face bg-white">
+                <div class="text-8xl font-black text-gray-800">${current.letter}</div>
+                <div class="mt-8 text-gray-400 font-bold animate-pulse">Tap Flip to Learn</div>
+              </div>
+              <div class="card-face card-back bg-white p-6 text-center">
+                <div class="text-6xl mb-2">${current.emoji}</div>
+                <div class="text-6xl font-black text-indigo-600 mb-2">${current.letter}</div>
+                <div class="text-2xl font-black text-gray-800">${current.name}</div>
+                <div class="text-gray-500 font-bold italic">"${current.sound}"</div>
               </div>
             </div>
           </div>
-          
-          <!-- Controls -->
-          <div style="text-align: center;">
-            <button id="flip-btn" style="background: ${config.primary_button_color || defaultConfig.primary_button_color}; color: white; padding: 1rem 2.5rem; border-radius: 1rem; font-size: 1.125rem; font-weight: 600; border: none; cursor: pointer; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); width: 100%; max-width: 380px; transition: transform 0.2s;">
-              ${config.flip_button_text || defaultConfig.flip_button_text}
+
+          <div class="w-full max-w-sm space-y-3">
+            <button onclick="toggleFlip()" class="w-full py-4 rounded-2xl text-white font-black text-xl shadow-lg" style="background:${cfg.primary_button_color}">
+              🔄 Flip & Listen
             </button>
-            
-            <div style="display: flex; gap: 0.75rem; justify-content: center; margin-bottom: 1rem; max-width: 380px; margin-left: auto; margin-right: auto;">
-              <button id="know-btn" style="flex: 1; background: ${config.primary_button_color || defaultConfig.primary_button_color}; color: white; padding: 0.875rem 1rem; border-radius: 0.75rem; font-size: 1rem; font-weight: 600; border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); transition: transform 0.2s;" ${isLoading ? 'disabled' : ''}>
-                ${config.know_it_button || defaultConfig.know_it_button}
-              </button>
-              <button id="practice-btn" style="flex: 1; background: ${config.secondary_button_color || defaultConfig.secondary_button_color}; color: white; padding: 0.875rem 1rem; border-radius: 0.75rem; font-size: 1rem; font-weight: 600; border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); transition: transform 0.2s;" ${isLoading ? 'disabled' : ''}>
-                ${config.practice_button || defaultConfig.practice_button}
-              </button>
+            <div class="flex gap-3">
+              <button onclick="nextLetter(true)" class="flex-1 py-3 bg-white/20 text-white rounded-xl font-bold">✨ I Know It!</button>
+              <button onclick="nextLetter(false)" class="flex-1 py-3 bg-white/20 text-white rounded-xl font-bold">🔁 Practice</button>
             </div>
-            
-            <p style="color: #FFFFFF; font-weight: 600; font-size: 1rem;">Letter ${currentIndex + 1} of ${arabicLetters.length}</p>
+            <button onclick="showingGrid=true; render()" class="w-full text-white/60 font-bold py-2">📋 View All Letters</button>
           </div>
         </div>
       `;
-      
-      document.getElementById('flip-btn').addEventListener('click', flipCard);
-      document.getElementById('know-btn').addEventListener('click', markAsKnown);
-      document.getElementById('practice-btn').addEventListener('click', markForPractice);
-      
-      const buttons = document.querySelectorAll('button');
-      buttons.forEach(btn => {
-        btn.addEventListener('mouseenter', function() {
-          if (!this.disabled) this.style.transform = 'scale(1.05)';
-        });
-        btn.addEventListener('mouseleave', function() {
-          this.style.transform = 'scale(1)';
-        });
-      });
-      
-      updateProgressDisplay();
     }
 
-    function renderLetterGrid() {
-      const app = document.getElementById('app');
-      const config = window.elementSdk.config;
-      
-      let gridHTML = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.75rem;">';
-      
-      arabicLetters.forEach((letter, index) => {
-        const progress = getLetterProgress(letter.letter);
-        const stars = progress ? progress.stars_earned : 0;
-        const practiced = progress ? progress.times_practiced : 0;
-        
-        gridHTML += `
-          <div class="letter-grid-item" onclick="selectLetter(${index})" style="background: ${config.card_color || defaultConfig.card_color}; padding: 1rem; border-radius: 1rem; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); position: relative;">
-            <div style="font-size: 2.5rem; margin-bottom: 0.25rem;">${letter.letter}</div>
-            <div style="font-size: 0.75rem; color: ${config.text_color || defaultConfig.text_color}; opacity: 0.7; margin-bottom: 0.25rem;">${letter.name}</div>
-            <div style="font-size: 0.875rem;">${'⭐'.repeat(stars) || '☆☆☆'}</div>
-            ${practiced > 0 ? `<div style="font-size: 0.625rem; color: ${config.text_color || defaultConfig.text_color}; opacity: 0.6; margin-top: 0.25rem;">${practiced}x practiced</div>` : ''}
-          </div>
-        `;
-      });
-      
-      gridHTML += '</div>';
-      
-      app.innerHTML = `
-        <div class="w-full" style="min-height: 100%; padding: 1.5rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-            <h2 style="color: #FFFFFF; font-size: 1.5rem; font-weight: bold;">📚 All Letters</h2>
-            <button onclick="toggleGrid()" style="background: rgba(255, 255, 255, 0.2); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; border: none; cursor: pointer; font-size: 0.875rem; font-weight: 600;">
-              ← Back to Cards
-            </button>
-          </div>
-          
-          <div style="background: rgba(255, 255, 255, 0.1); padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem; text-align: center;">
-            <p style="color: #FFFFFF; font-weight: 600;">⭐ ${totalStars} Total Stars | ${userProgress.filter(p => p.stars_earned >= 3).length}/${arabicLetters.length} Mastered</p>
-          </div>
-          
-          ${gridHTML}
-        </div>
-      `;
-    }
-
-    function flipCard() {
-      isFlipped = !isFlipped;
-      const card = document.getElementById('card');
-      if (card) {
-        card.classList.toggle('flipped');
-        card.classList.add('bounce');
-        setTimeout(() => card.classList.remove('bounce'), 500);
-      }
-    }
-
-    function nextCard() {
-      currentIndex = (currentIndex + 1) % arabicLetters.length;
-      isFlipped = false;
-      renderApp();
-      onConfigChange(window.elementSdk.config);
-    }
-
-    function selectLetter(index) {
-      currentIndex = index;
-      isFlipped = false;
-      showingGrid = false;
-      renderApp();
-      onConfigChange(window.elementSdk.config);
-    }
-
-    function toggleGrid() {
-      showingGrid = !showingGrid;
-      renderApp();
-      onConfigChange(window.elementSdk.config);
-    }
-
-    window.selectLetter = selectLetter;
-    window.toggleGrid = toggleGrid;
-
-    async function initApp() {
-      const initResult = await window.dataSdk.init(dataHandler);
-      if (!initResult.isOk) {
-        console.error("Failed to initialize data SDK");
-        return;
-      }
-
-      await window.elementSdk.init({
-        defaultConfig,
-        onConfigChange,
-        mapToCapabilities: (config) => ({
-          recolorables: [
-            {
-              get: () => config.background_color || defaultConfig.background_color,
-              set: (value) => {
-                config.background_color = value;
-                window.elementSdk.setConfig({ background_color: value });
-              }
-            },
-            {
-              get: () => config.card_color || defaultConfig.card_color,
-              set: (value) => {
-                config.card_color = value;
-                window.elementSdk.setConfig({ card_color: value });
-              }
-            },
-            {
-              get: () => config.text_color || defaultConfig.text_color,
-              set: (value) => {
-                config.text_color = value;
-                window.elementSdk.setConfig({ text_color: value });
-              }
-            },
-            {
-              get: () => config.primary_button_color || defaultConfig.primary_button_color,
-              set: (value) => {
-                config.primary_button_color = value;
-                window.elementSdk.setConfig({ primary_button_color: value });
-              }
-            },
-            {
-              get: () => config.secondary_button_color || defaultConfig.secondary_button_color,
-              set: (value) => {
-                config.secondary_button_color = value;
-                window.elementSdk.setConfig({ secondary_button_color: value });
-              }
-            }
-          ],
-          borderables: [],
-          fontEditable: {
-            get: () => config.font_family || defaultConfig.font_family,
-            set: (value) => {
-              config.font_family = value;
-              window.elementSdk.setConfig({ font_family: value });
-            }
-          },
-          fontSizeable: {
-            get: () => config.font_size || defaultConfig.font_size,
-            set: (value) => {
-              config.font_size = value;
-              window.elementSdk.setConfig({ font_size: value });
-            }
-          }
-        }),
-        mapToEditPanelValues: (config) => new Map([
-          ["game_title", config.game_title || defaultConfig.game_title],
-          ["instruction_text", config.instruction_text || defaultConfig.instruction_text],
-          ["achievement_text", config.achievement_text || defaultConfig.achievement_text],
-          ["flip_button_text", config.flip_button_text || defaultConfig.flip_button_text],
-          ["know_it_button", config.know_it_button || defaultConfig.know_it_button],
-          ["practice_button", config.practice_button || defaultConfig.practice_button]
-        ])
-      });
-
-      renderApp();
-      onConfigChange(window.elementSdk.config);
-    }
-
-    initApp();
+    window.elementSdk.init({
+      defaultConfig,
+      onConfigChange: () => render()
+    });
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b3530df96dde0b5',t:'MTc2NjYzMjcwNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ </body>
 </html>
