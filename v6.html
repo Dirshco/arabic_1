@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arabic Alphabet Game</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
+    
+    * { font-family: 'Tajawal', Arial, sans-serif; box-sizing: border-box; }
+    
+    @keyframes confetti-fall {
+      0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+    
+    .confetti {
+      position: fixed; width: 10px; height: 10px;
+      animation: confetti-fall 3s linear forwards; z-index: 1000;
+    }
+    
+    .correct-animation { animation: pulse-correct 0.5s ease-in-out; }
+    @keyframes pulse-correct {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    .shake-animation { animation: shake 0.4s ease-in-out; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+    
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+      30% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+    }
+
+    .msg-pop { position: fixed; top: 50%; left: 50%; z-index: 2000; animation: fadeInOut 1.5s ease-in-out forwards; pointer-events: none; }
+  </style>
+ </head>
+ <body class="h-full">
+  <div id="app" class="h-full w-full overflow-auto transition-colors duration-700" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+   <div class="min-h-full flex flex-col items-center justify-center p-6">
+    <div class="w-full max-w-2xl text-center">
+     
+     <div class="mb-8">
+      <h1 id="gameTitle" class="text-4xl md:text-5xl font-black text-white mb-2 drop-shadow-lg">Learn Arabic Alphabet</h1>
+      <div class="flex items-center justify-center gap-4 mt-4 flex-wrap">
+       <div class="bg-white/20 rounded-full px-6 py-2 backdrop-blur-md text-white border border-white/30">
+        <span class="text-sm font-semibold">Level: </span><span id="currentLevel" class="text-lg font-black">1</span>
+       </div>
+       <div class="bg-white/20 rounded-full px-6 py-2 backdrop-blur-md text-white border border-white/30">
+        <span class="text-sm font-semibold">Score: </span><span id="scoreDisplay" class="text-lg font-black">0</span>
+       </div>
+      </div>
+      <div id="progressBar" class="flex justify-center gap-2 mt-6"></div>
+     </div>
+
+     <div class="bg-white rounded-3xl shadow-2xl p-8 mb-6 relative overflow-hidden">
+      <div id="gameContent">
+        <div id="letterDisplay" class="text-9xl font-black mb-4 transition-transform duration-300" style="color: #667eea;">ا</div>
+        <div class="text-gray-500 text-lg mb-8">Choose the correct name for this letter</div>
+        
+        <div id="optionsGrid" class="grid grid-cols-2 gap-4"></div>
+      </div>
+
+      <div id="successSection" class="hidden py-10">
+        <div class="text-6xl mb-4">🎊</div>
+        <h2 id="successMessage" class="text-3xl font-black text-indigo-600 mb-2">Excellent!</h2>
+        <p id="successDetail" class="text-gray-600 mb-8">You unlocked Level 2!</p>
+        <button id="actionButton" class="w-full py-4 rounded-2xl text-white text-xl font-black shadow-xl hover:scale-105 transition-transform"></button>
+      </div>
+     </div>
+
+     <div class="text-white/80 font-medium">💡 Hint: Arabic is read from right to left!</div>
+    </div>
+   </div>
+  </div>
+
+  <script>
+    const arabicLetters = [
+      { letter: 'ا', name: 'Alif', options: ['Alif', 'Ba', 'Ta', 'Jim'], level: 1 },
+      { letter: 'ب', name: 'Ba', options: ['Ba', 'Ta', 'Tha', 'Kha'], level: 1 },
+      { letter: 'ت', name: 'Ta', options: ['Ta', 'Dal', 'Alif', 'Ra'], level: 1 },
+      { letter: 'ث', name: 'Tha', options: ['Tha', 'Zay', 'Seen', 'Sheen'], level: 1 },
+      { letter: 'ج', name: 'Jim', options: ['Jim', 'Sad', 'Dad', 'Ta'], level: 1 },
+      { letter: 'ح', name: 'Ha', options: ['Ha', 'Dha', 'Ain', 'Ghain'], level: 1 },
+      { letter: 'خ', name: 'Kha', options: ['Kha', 'Fa', 'Qaf', 'Kaf'], level: 1 },
+      { letter: 'د', name: 'Dal', options: ['Dal', 'Lam', 'Meem', 'Noon'], level: 1 },
+      { letter: 'ذ', name: 'Dhal', options: ['Dhal', 'Ha', 'Waw', 'Ya'], level: 1 },
+      { letter: 'ر', name: 'Ra', options: ['Ra', 'Alif', 'Ba', 'Ta'], level: 1 },
+      { letter: 'ز', name: 'Zay', options: ['Zay', 'Seen', 'Sheen', 'Sad'], level: 1 },
+      { letter: 'س', name: 'Seen', options: ['Seen', 'Dad', 'Dha', 'Ain'], level: 1 },
+      { letter: 'ش', name: 'Sheen', options: ['Sheen', 'Ghain', 'Fa', 'Qaf'], level: 1 },
+      { letter: 'ص', name: 'Sad', options: ['Sad', 'Kaf', 'Lam', 'Meem'], level: 1 },
+      { letter: 'ض', name: 'Dad', options: ['Dad', 'Noon', 'Ha', 'Waw'], level: 2 },
+      { letter: 'ط', name: 'Taa', options: ['Taa', 'Ya', 'Alif', 'Ba'], level: 2 }, // Fixed: Corrected Name
+      { letter: 'ظ', name: 'Zha', options: ['Zha', 'Ta', 'Tha', 'Jim'], level: 2 },
+      { letter: 'ع', name: 'Ain', options: ['Ain', 'Ha', 'Kha', 'Dal'], level: 2 },
+      { letter: 'غ', name: 'Ghain', options: ['Ghain', 'Dhal', 'Ra', 'Zay'], level: 2 },
+      { letter: 'ف', name: 'Fa', options: ['Fa', 'Seen', 'Sheen', 'Sad'], level: 2 },
+      { letter: 'ق', name: 'Qaf', options: ['Qaf', 'Dad', 'Dha', 'Zha'], level: 2 },
+      { letter: 'ك', name: 'Kaf', options: ['Kaf', 'Ain', 'Ghain', 'Fa'], level: 2 },
+      { letter: 'ل', name: 'Lam', options: ['Lam', 'Qaf', 'Kaf', 'Meem'], level: 2 },
+      { letter: 'م', name: 'Meem', options: ['Meem', 'Noon', 'Ha', 'Waw'], level: 2 },
+      { letter: 'ن', name: 'Noon', options: ['Noon', 'Ya', 'Alif', 'Ba'], level: 2 },
+      { letter: 'ه', name: 'Ha', options: ['Ha', 'Ta', 'Tha', 'Jim'], level: 2 },
+      { letter: 'و', name: 'Waw', options: ['Waw', 'Ha', 'Kha', 'Dal'], level: 2 },
+      { letter: 'ي', name: 'Ya', options: ['Ya', 'Dhal', 'Ra', 'Zay'], level: 2 }
+    ];
+
+    const backgrounds = ['#667eea', '#f5576c', '#4facfe', '#43e97b', '#fa709a', '#330867', '#ff6a88'];
+    let currentLevel = 1;
+    let currentIndex = 0;
+    let score = 0;
+    let isProcessing = false;
+
+    function getLevelLetters() { return arabicLetters.filter(l => l.level === currentLevel); }
+
+    function createConfetti() {
+      for (let i = 0; i < 50; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = Math.random() * 100 + '%';
+        c.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 60%)`;
+        c.style.animationDuration = (Math.random() * 2 + 1) + 's';
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 3000);
+      }
+    }
+
+    function speak(text) {
+      if ('speechSynthesis' in window) {
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'ar-SA';
+        window.speechSynthesis.speak(msg);
+      }
+    }
+
+    function showPopup(text) {
+      const el = document.createElement('div');
+      el.className = 'msg-pop text-4xl md:text-6xl font-black text-white drop-shadow-2xl';
+      el.textContent = text;
+      el.style.color = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1500);
+    }
+
+    function render() {
+      const letters = getLevelLetters();
+      const current = letters[currentIndex];
+      const app = document.getElementById('app');
+      
+      app.style.background = `linear-gradient(135deg, ${backgrounds[currentIndex % backgrounds.length]} 0%, #2d3436 100%)`;
+      document.getElementById('currentLevel').textContent = currentLevel;
+      document.getElementById('scoreDisplay').textContent = score;
+      document.getElementById('letterDisplay').textContent = current.letter;
+      
+      const pb = document.getElementById('progressBar');
+      pb.innerHTML = letters.map((_, i) => `
+        <div class="w-3 h-3 rounded-full transition-all duration-500 ${i <= currentIndex ? 'bg-white scale-125' : 'bg-white/30'}"></div>
+      `).join('');
+
+      const grid = document.getElementById('optionsGrid');
+      grid.innerHTML = '';
+      [...current.options].sort(() => Math.random() - 0.5).forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'py-6 px-4 rounded-2xl text-xl font-black text-white shadow-lg transition-all hover:scale-105 active:scale-95';
+        btn.style.background = `linear-gradient(135deg, #6366f1 0%, #a855f7 100%)`;
+        btn.textContent = opt;
+        btn.onclick = () => handleAnswer(opt, btn);
+        grid.appendChild(btn);
+      });
+      
+      document.getElementById('gameContent').classList.remove('hidden');
+      document.getElementById('successSection').classList.add('hidden');
+      isProcessing = false;
+    }
+
+    function handleAnswer(selected, btn) {
+      if (isProcessing) return;
+      const letters = getLevelLetters();
+      const correct = letters[currentIndex].name;
+
+      if (selected === correct) {
+        isProcessing = true;
+        score += 10;
+        btn.classList.add('correct-animation');
+        btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+        createConfetti();
+        speak(letters[currentIndex].letter); // Sound feedback
+        
+        const messages = [
+          'Amazing! 🚀', 'Great! 🌟', 'Perfect! ✨', 'Brilliant! 💎', 
+          'Fantastic! 🎊', 'Well Done! 👏', 'Superb! 🎯', 'Excellent! 🌈', 
+          'Wonderful! 💫', 'Incredible! 🔥', 'Awesome! 😎', 'Magnificent! 👑'
+        ];
+        showPopup(messages[Math.floor(Math.random() * messages.length)]);
+        
+        setTimeout(() => {
+          currentIndex++;
+          if (currentIndex >= letters.length) {
+            showEndLevel();
+          } else {
+            render();
+          }
+        }, 1500);
+      } else {
+        btn.classList.add('shake-animation');
+        btn.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+        setTimeout(() => {
+          btn.classList.remove('shake-animation');
+          btn.style.background = 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)';
+        }, 500);
+      }
+    }
+
+    function showEndLevel() {
+      document.getElementById('gameContent').classList.add('hidden');
+      const sec = document.getElementById('successSection');
+      const btn = document.getElementById('actionButton');
+      const det = document.getElementById('successDetail');
+      sec.classList.remove('hidden');
+
+      if (currentLevel === 1) {
+        det.textContent = `Amazing! You mastered Level 1 with ${score} points!`;
+        btn.textContent = "Start Level 2 🚀";
+        btn.style.background = "linear-gradient(135deg, #10b981 0%, #059669 100%)";
+        btn.onclick = () => { currentLevel = 2; currentIndex = 0; render(); };
+      } else {
+        det.textContent = "You have completed the entire Alphabet Adventure!";
+        btn.textContent = "Play Again 🔄";
+        btn.style.background = "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)";
+        btn.onclick = () => { currentLevel = 1; score = 0; currentIndex = 0; render(); };
+      }
+    }
+
+    render();
+  </script>
+ </body>
+</html>
