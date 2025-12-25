@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arabic Alphabet Game</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(-100%) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+    
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      animation: confetti-fall 3s linear forwards;
+      z-index: 1000;
+    }
+    
+    @keyframes pulse-correct {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
+    
+    .correct-animation {
+      animation: pulse-correct 0.5s ease-in-out;
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+    
+    .shake-animation {
+      animation: shake 0.4s ease-in-out;
+    }
+    
+    @keyframes fadeInOut {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+      }
+      30% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1);
+      }
+      70% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="h-full w-full overflow-auto" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+   <div class="min-h-full flex flex-col items-center justify-center p-8">
+    <div class="w-full max-w-2xl"><!-- Header -->
+     <div class="text-center mb-8">
+      <h1 id="gameTitle" class="text-5xl font-bold text-white mb-2" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">Learn Arabic Alphabet</h1>
+      <div class="flex items-center justify-center gap-4 mt-4 flex-wrap">
+       <div class="bg-white bg-opacity-20 rounded-full px-6 py-2 backdrop-blur-sm"><span class="text-white text-sm font-semibold">Level: </span> <span id="currentLevel" class="text-white text-lg font-bold">1</span>
+       </div>
+       <div class="bg-white bg-opacity-20 rounded-full px-6 py-2 backdrop-blur-sm"><span class="text-white text-sm font-semibold">Score: </span> <span id="scoreDisplay" class="text-white text-lg font-bold">0</span>
+       </div>
+      </div>
+      <div class="flex items-center justify-center gap-3 mt-4">
+       <div class="text-white text-sm">
+        Progress:
+       </div>
+       <div id="progressBar" class="flex gap-1"></div>
+      </div>
+     </div><!-- Game Card -->
+     <div class="bg-white rounded-3xl shadow-2xl p-8 mb-6"><!-- Arabic Letter Display -->
+      <div class="text-center mb-8">
+       <div id="letterDisplay" class="text-9xl font-bold mb-4" style="color: #667eea; font-family: 'Arial', sans-serif;">
+        ا
+       </div>
+       <div class="text-gray-600 text-lg">
+        Click the correct name for this letter
+       </div>
+      </div><!-- Options Grid -->
+      <div id="optionsGrid" class="grid grid-cols-2 gap-4 mb-6"><!-- Options will be dynamically generated -->
+      </div><!-- Success Message & Next Button -->
+      <div id="successSection" class="hidden text-center">
+       <div class="mb-6">
+        <div class="text-6xl mb-3">
+         🎉
+        </div>
+        <div id="successMessage" class="text-3xl font-bold mb-2" style="color: #667eea;">
+         Excellent!
+        </div>
+        <div class="text-gray-600 text-lg">
+         You got it right!
+        </div>
+       </div><button id="nextButton" class="text-white font-bold py-4 px-8 rounded-2xl text-xl transition-all hover:scale-105 shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"> Next Letter → </button>
+      </div>
+     </div><!-- Fun Fact -->
+     <div class="text-center text-white text-sm opacity-90">
+      💡 Arabic is read from right to left!
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      game_title: "Learn Arabic Alphabet",
+      success_message: "Excellent!",
+      next_button_text: "Next Letter →",
+      background_color: "#667eea",
+      card_color: "#ffffff",
+      text_color: "#1f2937",
+      button_color: "#667eea",
+      accent_color: "#764ba2"
+    };
+
+    const arabicLetters = [
+      // Level 1 (Letters 1-14)
+      { letter: 'ا', name: 'Alif', options: ['Alif', 'Ba', 'Ta', 'Tha'], level: 1 },
+      { letter: 'ب', name: 'Ba', options: ['Ba', 'Jim', 'Ha', 'Kha'], level: 1 },
+      { letter: 'ت', name: 'Ta', options: ['Ta', 'Dal', 'Dhal', 'Ra'], level: 1 },
+      { letter: 'ث', name: 'Tha', options: ['Tha', 'Zay', 'Seen', 'Sheen'], level: 1 },
+      { letter: 'ج', name: 'Jim', options: ['Jim', 'Sad', 'Dad', 'Ta'], level: 1 },
+      { letter: 'ح', name: 'Ha', options: ['Ha', 'Dha', 'Ain', 'Ghain'], level: 1 },
+      { letter: 'خ', name: 'Kha', options: ['Kha', 'Fa', 'Qaf', 'Kaf'], level: 1 },
+      { letter: 'د', name: 'Dal', options: ['Dal', 'Lam', 'Meem', 'Noon'], level: 1 },
+      { letter: 'ذ', name: 'Dhal', options: ['Dhal', 'Ha', 'Waw', 'Ya'], level: 1 },
+      { letter: 'ر', name: 'Ra', options: ['Ra', 'Alif', 'Ba', 'Ta'], level: 1 },
+      { letter: 'ز', name: 'Zay', options: ['Zay', 'Seen', 'Sheen', 'Sad'], level: 1 },
+      { letter: 'س', name: 'Seen', options: ['Seen', 'Dad', 'Dha', 'Ain'], level: 1 },
+      { letter: 'ش', name: 'Sheen', options: ['Sheen', 'Ghain', 'Fa', 'Qaf'], level: 1 },
+      { letter: 'ص', name: 'Sad', options: ['Sad', 'Kaf', 'Lam', 'Meem'], level: 1 },
+      // Level 2 (Letters 15-28)
+      { letter: 'ض', name: 'Dad', options: ['Dad', 'Noon', 'Ha', 'Waw'], level: 2 },
+      { letter: 'ط', name: 'Dha', options: ['Dha', 'Ya', 'Alif', 'Ba'], level: 2 },
+      { letter: 'ظ', name: 'Zha', options: ['Zha', 'Ta', 'Tha', 'Jim'], level: 2 },
+      { letter: 'ع', name: 'Ain', options: ['Ain', 'Ha', 'Kha', 'Dal'], level: 2 },
+      { letter: 'غ', name: 'Ghain', options: ['Ghain', 'Dhal', 'Ra', 'Zay'], level: 2 },
+      { letter: 'ف', name: 'Fa', options: ['Fa', 'Seen', 'Sheen', 'Sad'], level: 2 },
+      { letter: 'ق', name: 'Qaf', options: ['Qaf', 'Dad', 'Dha', 'Zha'], level: 2 },
+      { letter: 'ك', name: 'Kaf', options: ['Kaf', 'Ain', 'Ghain', 'Fa'], level: 2 },
+      { letter: 'ل', name: 'Lam', options: ['Lam', 'Qaf', 'Kaf', 'Meem'], level: 2 },
+      { letter: 'م', name: 'Meem', options: ['Meem', 'Noon', 'Ha', 'Waw'], level: 2 },
+      { letter: 'ن', name: 'Noon', options: ['Noon', 'Ya', 'Alif', 'Ba'], level: 2 },
+      { letter: 'ه', name: 'Ha', options: ['Ha', 'Ta', 'Tha', 'Jim'], level: 2 },
+      { letter: 'و', name: 'Waw', options: ['Waw', 'Ha', 'Kha', 'Dal'], level: 2 },
+      { letter: 'ي', name: 'Ya', options: ['Ya', 'Dhal', 'Ra', 'Zay'], level: 2 }
+    ];
+
+    const backgrounds = [
+      'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+      'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+      'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+      'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
+      'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+      'linear-gradient(135deg, #ff9a56 0%, #ff6a88 100%)',
+      'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+      'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+      'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+      'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
+    ];
+
+    let currentLevel = 1;
+    let currentIndex = 0;
+    let isAnswered = false;
+    let score = 0;
+    let currentLevelLetters = arabicLetters.filter(l => l.level === 1);
+
+    function shuffleArray(array) {
+      const newArray = [...array];
+      for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+      }
+      return newArray;
+    }
+
+    function createConfetti() {
+      const colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a', '#fee140', '#30cfd0', '#ff9a56', '#ff6b9d', '#c471ed', '#12c2e9', '#f857a6', '#ffa07a', '#98d8c8', '#f6d365', '#fda085', '#a18cd1', '#fbc2eb'];
+      
+      for (let i = 0; i < 150; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          confetti.style.left = Math.random() * 100 + '%';
+          confetti.style.top = '-20px';
+          confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.animationDelay = '0s';
+          confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+          
+          // Random shape
+          const randomShape = Math.random();
+          if (randomShape > 0.66) {
+            confetti.style.borderRadius = '50%';
+          } else if (randomShape > 0.33) {
+            confetti.style.borderRadius = '2px';
+            confetti.style.transform = 'rotate(45deg)';
+          }
+          
+          // Random size
+          const size = Math.random() * 10 + 5;
+          confetti.style.width = size + 'px';
+          confetti.style.height = size + 'px';
+          
+          // Add sparkle effect to some confetti
+          if (Math.random() > 0.7) {
+            confetti.style.boxShadow = `0 0 ${size}px ${colors[Math.floor(Math.random() * colors.length)]}`;
+          }
+          
+          document.body.appendChild(confetti);
+          
+          setTimeout(() => confetti.remove(), 4000);
+        }, i * 10);
+      }
+    }
+
+    function renderProgressBar() {
+      const progressBar = document.getElementById('progressBar');
+      progressBar.innerHTML = '';
+      
+      currentLevelLetters.forEach((_, index) => {
+        const dot = document.createElement('div');
+        dot.className = 'w-3 h-3 rounded-full transition-all';
+        dot.style.backgroundColor = index < currentIndex ? window.elementSdk?.config?.accent_color || defaultConfig.accent_color : 
+                                   index === currentIndex ? window.elementSdk?.config?.button_color || defaultConfig.button_color : 
+                                   'rgba(255, 255, 255, 0.3)';
+        progressBar.appendChild(dot);
+      });
+    }
+
+    function renderQuestion() {
+      isAnswered = false;
+      const current = currentLevelLetters[currentIndex];
+      const letterDisplay = document.getElementById('letterDisplay');
+      const optionsGrid = document.getElementById('optionsGrid');
+      const successSection = document.getElementById('successSection');
+      const app = document.getElementById('app');
+      
+      // Change background color for each letter
+      app.style.background = backgrounds[currentIndex % backgrounds.length];
+      
+      letterDisplay.textContent = current.letter;
+      letterDisplay.style.color = window.elementSdk?.config?.button_color || defaultConfig.button_color;
+      successSection.classList.add('hidden');
+      
+      const shuffledOptions = shuffleArray(current.options);
+      optionsGrid.innerHTML = '';
+      
+      const buttonColors = [
+        { start: '#667eea', end: '#764ba2' },
+        { start: '#f093fb', end: '#f5576c' },
+        { start: '#4facfe', end: '#00f2fe' },
+        { start: '#43e97b', end: '#38f9d7' }
+      ];
+      
+      shuffledOptions.forEach((option, index) => {
+        const button = document.createElement('button');
+        button.className = 'text-white font-bold py-6 px-4 rounded-2xl text-2xl transition-all hover:scale-105 shadow-lg';
+        const colors = buttonColors[index % buttonColors.length];
+        button.style.background = `linear-gradient(135deg, ${colors.start} 0%, ${colors.end} 100%)`;
+        button.textContent = option;
+        button.onclick = () => handleAnswer(option, button);
+        
+        // Add hover glow effect
+        button.addEventListener('mouseenter', () => {
+          button.style.boxShadow = `0 0 20px ${colors.start}, 0 8px 16px rgba(0,0,0,0.2)`;
+        });
+        button.addEventListener('mouseleave', () => {
+          if (!button.classList.contains('correct-animation')) {
+            button.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+          }
+        });
+        
+        optionsGrid.appendChild(button);
+      });
+      
+      // Update level display
+      document.getElementById('currentLevel').textContent = currentLevel;
+      document.getElementById('scoreDisplay').textContent = score;
+      
+      renderProgressBar();
+    }
+
+    function handleAnswer(selectedOption, button) {
+      if (isAnswered) return;
+      
+      const current = currentLevelLetters[currentIndex];
+      const isCorrect = selectedOption === current.name;
+      
+      if (isCorrect) {
+        isAnswered = true;
+        score += 10;
+        document.getElementById('scoreDisplay').textContent = score;
+        button.classList.add('correct-animation');
+        button.style.boxShadow = '0 0 30px rgba(67, 233, 123, 0.8), 0 8px 16px rgba(0,0,0,0.2)';
+        createConfetti();
+        
+        // Show encouraging message
+        showEncouragingMessage();
+        
+        // Auto-advance to next letter after celebration
+        setTimeout(() => {
+          nextLetter();
+        }, 1500);
+      } else {
+        button.classList.add('shake-animation');
+        setTimeout(() => button.classList.remove('shake-animation'), 400);
+      }
+    }
+    
+    function showEncouragingMessage() {
+      const messages = [
+        'Great! 🌟',
+        'Awesome! 🎉',
+        'Well Done! 👏',
+        'Wonderful! ✨',
+        'Excellent! 🌈',
+        'Perfect! 💫',
+        'Amazing! 🚀',
+        'Fantastic! 🎊',
+        'Brilliant! 💎',
+        'Outstanding! 🏆',
+        'Superb! 🎯',
+        'Incredible! 🌺',
+        'Spectacular! 🎪',
+        'Magnificent! 👑',
+        'Phenomenal! ⭐',
+        'Fabulous! 🦋',
+        'Terrific! 🎨',
+        'Marvelous! 🎭',
+        'Splendid! 🌸',
+        'Exceptional! 💝'
+      ];
+      
+      const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+      
+      // Create message element with vibrant purple color
+      const messageEl = document.createElement('div');
+      messageEl.textContent = randomMessage;
+      messageEl.style.position = 'fixed';
+      messageEl.style.top = '50%';
+      messageEl.style.left = '50%';
+      messageEl.style.transform = 'translate(-50%, -50%)';
+      messageEl.style.fontSize = '4rem';
+      messageEl.style.fontWeight = 'bold';
+      messageEl.style.color = '#667eea';
+      messageEl.style.textShadow = '3px 3px 8px rgba(255,255,255,0.9), 0 0 25px rgba(102,126,234,0.6)';
+      messageEl.style.zIndex = '2000';
+      messageEl.style.animation = 'fadeInOut 1.5s ease-in-out';
+      messageEl.style.pointerEvents = 'none';
+      
+      document.body.appendChild(messageEl);
+      
+      // Remove after animation
+      setTimeout(() => messageEl.remove(), 1500);
+    }
+
+    function nextLetter() {
+      currentIndex++;
+      
+      // Check if completed current level
+      if (currentIndex >= currentLevelLetters.length) {
+        // Check if can unlock next level
+        if (currentLevel === 1 && score >= 140) {
+          // Unlock Level 2!
+          showLevelUpMessage();
+          return;
+        } else if (currentLevel === 1 && score < 140) {
+          // Not enough score, restart level 1
+          showNeedMoreScoreMessage();
+          return;
+        } else {
+          // Completed Level 2, restart
+          currentIndex = 0;
+        }
+      }
+      
+      document.getElementById('optionsGrid').style.opacity = '1';
+      renderQuestion();
+    }
+
+    function showLevelUpMessage() {
+      const successSection = document.getElementById('successSection');
+      successSection.innerHTML = `
+        <div class="mb-6">
+          <div class="text-6xl mb-3">🎊🌟🎊</div>
+          <div class="text-3xl font-bold mb-2" style="color: #667eea;">
+            Level Up!
+          </div>
+          <div class="text-gray-600 text-lg mb-4">
+            Amazing! You've unlocked Level 2!<br>
+            Score: ${score} points
+          </div>
+        </div>
+        <button id="levelUpButton" class="text-white font-bold py-4 px-8 rounded-2xl text-xl transition-all hover:scale-105 shadow-lg" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+          Start Level 2 🚀
+        </button>
+      `;
+      successSection.classList.remove('hidden');
+      
+      document.getElementById('levelUpButton').addEventListener('click', (e) => {
+        e.preventDefault();
+        currentLevel = 2;
+        currentLevelLetters = arabicLetters.filter(l => l.level === 2);
+        currentIndex = 0;
+        successSection.classList.add('hidden');
+        document.getElementById('optionsGrid').style.opacity = '1';
+        renderQuestion();
+      });
+    }
+
+    function showNeedMoreScoreMessage() {
+      const successSection = document.getElementById('successSection');
+      successSection.innerHTML = `
+        <div class="mb-6">
+          <div class="text-6xl mb-3">💪</div>
+          <div class="text-3xl font-bold mb-2" style="color: #667eea;">
+            Keep Practicing!
+          </div>
+          <div class="text-gray-600 text-lg mb-4">
+            You need 140 points to unlock Level 2<br>
+            Current score: ${score} points
+          </div>
+        </div>
+        <button id="restartButton" class="text-white font-bold py-4 px-8 rounded-2xl text-xl transition-all hover:scale-105 shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+          Try Again
+        </button>
+      `;
+      successSection.classList.remove('hidden');
+      
+      document.getElementById('restartButton').addEventListener('click', (e) => {
+        e.preventDefault();
+        currentIndex = 0;
+        score = 0;
+        successSection.classList.add('hidden');
+        document.getElementById('optionsGrid').style.opacity = '1';
+        renderQuestion();
+      });
+    }
+
+    async function onConfigChange(config) {
+      const gameTitle = document.getElementById('gameTitle');
+      const successMessage = document.getElementById('successMessage');
+      const nextButton = document.getElementById('nextButton');
+      const app = document.getElementById('app');
+      const letterDisplay = document.getElementById('letterDisplay');
+      
+      gameTitle.textContent = config.game_title || defaultConfig.game_title;
+      successMessage.textContent = config.success_message || defaultConfig.success_message;
+      nextButton.textContent = config.next_button_text || defaultConfig.next_button_text;
+      
+      const bgColor = config.background_color || defaultConfig.background_color;
+      const accentColor = config.accent_color || defaultConfig.accent_color;
+      app.style.background = `linear-gradient(135deg, ${bgColor} 0%, ${accentColor} 100%)`;
+      
+      letterDisplay.style.color = config.button_color || defaultConfig.button_color;
+      
+      const buttons = document.querySelectorAll('#optionsGrid button');
+      buttons.forEach(btn => {
+        btn.style.background = `linear-gradient(135deg, ${config.button_color || defaultConfig.button_color} 0%, ${config.accent_color || defaultConfig.accent_color} 100%)`;
+      });
+      
+      const nextBtn = document.getElementById('nextButton');
+      if (nextBtn) {
+        nextBtn.style.background = `linear-gradient(135deg, ${config.button_color || defaultConfig.button_color} 0%, ${config.accent_color || defaultConfig.accent_color} 100%)`;
+      }
+      
+      renderProgressBar();
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.card_color || defaultConfig.card_color,
+              set: (value) => {
+                config.card_color = value;
+                window.elementSdk.setConfig({ card_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.button_color || defaultConfig.button_color,
+              set: (value) => {
+                config.button_color = value;
+                window.elementSdk.setConfig({ button_color: value });
+              }
+            },
+            {
+              get: () => config.accent_color || defaultConfig.accent_color,
+              set: (value) => {
+                config.accent_color = value;
+                window.elementSdk.setConfig({ accent_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ['game_title', config.game_title || defaultConfig.game_title],
+          ['success_message', config.success_message || defaultConfig.success_message],
+          ['next_button_text', config.next_button_text || defaultConfig.next_button_text]
+        ])
+      });
+    }
+
+    document.getElementById('nextButton').addEventListener('click', (e) => {
+      e.preventDefault();
+      nextLetter();
+    });
+
+    renderQuestion();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b3a9fe80719e0b5',t:'MTc2NjY4OTY4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
